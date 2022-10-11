@@ -1,25 +1,41 @@
 import * as vscode from 'vscode';
-import { Simulation } from './Simulation';
+import { Parser } from './Parser';
 
 export function activate(context: vscode.ExtensionContext) {
+	// register commands
 	let disposable = vscode.commands.registerCommand('legv8-assembly.runLegV8', () => {
 
 		const editor = vscode.window.activeTextEditor;
 
 		if (editor) {
 			const document = editor.document;
-			const text = document.getText();
+			const start = editor.selection.start;
+			const end = editor.selection.end;
 
-			const sim = new Simulation(text);
+			let sim;
+
+			if (start.isEqual(end)) {
+				// if nothing selected, run the entire document
+				sim = Parser.parseSimulation(document.getText());
+			} else {
+				// if something selected, run just the selected code
+				sim = Parser.parseSimulation(document.getText(new vscode.Range(start, end)));
+			}
+
 			sim.print();
-		} else {
-			console.log("No editor open.");
 		}
 
 		//vscode.window.showInformationMessage('Hello World from LEGv8 Assembly!');
 	});
 
 	context.subscriptions.push(disposable);
+
+	console.log("Commands registered.");
+
+	// load core instructions
+	Parser.loadCoreInstructions("../resources/core-instructions.csv");
+
+	console.log("Core Instructions loaded.");
 }
 
 // This method is called when your extension is deactivated
