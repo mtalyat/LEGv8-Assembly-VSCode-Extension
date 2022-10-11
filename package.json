@@ -1,0 +1,67 @@
+{
+  "name": "legv8-assembly",
+  "displayName": "LEGv8 Assembly",
+  "description": "Language support and built-in simulator for LEGv8 Assembly.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.72.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onCommand:legv8-assembly.runLegV8"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "legv8-assembly.runLegV8",
+        "title": "LEGv8: Run LEGv8 Assembly Code"
+      }
+    ],
+    "languages": [
+      {
+        "id": "LEGv8",
+        "aliases": [
+          "legv8",
+          "Legv8",
+          "LEGv8 Assembly",
+          "legv8 assembly"
+        ],
+        "extensions": [
+          ".legv8",
+          ".legv8asm",
+          ".legv8assembly"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "LEGv8",
+        "scopeName": "source.LEGv8",
+        "path": "./syntaxes/LEGv8.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.72.0",
+    "@types/glob": "^8.0.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "16.x",
+    "eslint": "^8.24.0",
+    "glob": "^8.0.3",
+    "mocha": "^10.0.0",
+    "typescript": "^4.8.4",
+    "@vscode/test-electron": "^2.1.5"
+  }
+}
