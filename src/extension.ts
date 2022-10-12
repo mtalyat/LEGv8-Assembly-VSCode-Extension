@@ -21,8 +21,6 @@ export function activate(context: vscode.ExtensionContext) {
 				// if something selected, run just the selected code
 				sim = Parser.parseSimulation(document.getText(new vscode.Range(start, end)));
 			}
-
-			sim.print();
 		}
 
 		//vscode.window.showInformationMessage('Hello World from LEGv8 Assembly!');

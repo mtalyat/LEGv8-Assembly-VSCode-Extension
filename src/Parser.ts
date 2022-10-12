@@ -4,6 +4,13 @@ import { Line } from "./Line";
 import { Instruction } from "./Instruction";
 import { Simulation } from "./Simulation";
 import { CoreInstruction } from "./CoreInstruction";
+import { BInstruction } from './BInstruction';
+import { CBInstruction } from './CBInstruction';
+import { IInstruction } from './IInstruction';
+import { IMInstruction } from './IMInstruction';
+import { RInstruction } from './RInstruction';
+import { ZInstruction } from './ZInstruction';
+import { DInstruction } from './DInstruction';
 
 export class Parser {
     static readonly identifierComments: string = "//";
@@ -76,14 +83,25 @@ export class Parser {
         if (core !== undefined) {
             // found the core
 
-            // check formatting
-            if (line.hasFormatting(core.args, core.argTypes)) {
-
-                return new Instruction(line);
+            // create instruction
+            switch (core.format) {
+                case 'B':
+                    return new BInstruction(core, line);
+                case 'CB':
+                    return new CBInstruction(core, line);
+                case 'D':
+                    return new DInstruction(core, line);
+                case 'I':
+                    return new IInstruction(core, line);
+                case 'IM':
+                    return new IMInstruction(core, line);
+                case 'R':
+                    return new RInstruction(core, line);
+                case 'Z':
+                    return new ZInstruction(core, line);
+                default:
+                    return new Instruction(core, line);
             }
-
-            // invalid syntax
-            console.log(`Invalid syntax: ${line.toString()}`);
         } else {
             console.log(`Unrecognized: ${line.toString()}`);
         }

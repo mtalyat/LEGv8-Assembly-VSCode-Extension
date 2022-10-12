@@ -1,5 +1,5 @@
 export enum InstructionMnemonic {
-    Empty,
+    Empty = "",
     ADD = "ADD",
     ADDI = "ADDI",
     ADDIS = "ADDIS",
