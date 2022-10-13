@@ -54,7 +54,11 @@ export class Parser {
         }
     }
 
-    public static parseCoreInstruction(text: string): CoreInstruction | null {
+    public static getCoreInstructions(): CoreInstruction[] {
+        return [...this._cores.values()];
+    }
+
+    private static parseCoreInstruction(text: string): CoreInstruction | null {
         // split by commas not within strings
         let args: string[] = text.split(new RegExp(',(?=(?:[^"]*"[^"]*")*[^"]*$)'));
 

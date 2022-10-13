@@ -1,0 +1,18 @@
+{
+    "name": "legv8-assembly",
+    "displayName": "LEGv8 Assembly",
+    "description": "Implementation of a LEGv8 Assembly language server in node.",
+    "version": "1.0.0",
+    "engines": {
+        "node": "*"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mtalyat/LEGv8-Assembly-VSCode-Extension"
+    },
+    "dependencies": {
+        "vscode-languageserver": "^7.0.0",
+        "vscode-languageserver-textdocument": "^1.0.4"
+    },
+    "scripts": {}
+}

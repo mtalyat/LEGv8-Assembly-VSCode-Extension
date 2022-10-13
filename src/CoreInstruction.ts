@@ -87,7 +87,7 @@ export class CoreInstruction {
     // returns undefined if incorrect syntax
     public extractArgValuesFromLine(line: Line): number[] | undefined {
         // get the splits of what we should find within the line
-        let splits = this._argsFormat.split('X');
+        let splits = this._argsFormat.split('_');
         if (splits.length >= 1) {
             // if beginning is empty
             if (splits[0] === "") {
