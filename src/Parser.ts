@@ -78,7 +78,7 @@ export class Parser {
         // assume in instruction format
 
         // find matching core instruction
-        let core = this._cores.get(line.getLabel());
+        let core = this._cores.get(line.getLabel().toUpperCase());
 
         if (core !== undefined) {
             // found the core
@@ -199,14 +199,14 @@ export class Parser {
     }
 
     public static parseImmediate(text: string): number | undefined {
-        // make sure it starts with the identifier
-        if (!text.startsWith(this.identifierImmediatePrefix)) {
-            return undefined;
+        let str: string = text;
+
+        // if starts with the identifier, remove it
+        if (text.startsWith(this.identifierImmediatePrefix)) {
+            str = str.substring(1);
         }
 
-        // remove the identifier
-        let str = text.substring(1);
-
+        // not it is just a number, so parse it
         return this.parseNumber(str);
     }
 

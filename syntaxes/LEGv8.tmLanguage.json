@@ -27,17 +27,17 @@
     "repository": {
         "literal": {
             "name": "constant.numeric",
-            "match": "(#[0-9]+\\b)"
+            "match": "((#)?[0-9]+\\b)"
         },
         "register": {
             "name": "variable.LEGv8",
-            "match": "\\b(X0|X1|X2|X3|4X|X5|X6|X7|X8|X9|X10|X11|X12|X13|X14|X15|X16|X17|X18|X19|X20|X21|X22|X23|X24|X25|X26|X27|X28|X29|X30|X31|SP|FP|LR|XZR|IP0|IP1)\\b"
+            "match": "(?i)\\b(X0|X1|X2|X3|4X|X5|X6|X7|X8|X9|X10|X11|X12|X13|X14|X15|X16|X17|X18|X19|X20|X21|X22|X23|X24|X25|X26|X27|X28|X29|X30|X31|SP|FP|LR|XZR|IP0|IP1)\\b"
         },
         "instruction": {
             "name": "instruction.LEGv8",
             "patterns": [
                 {
-                    "begin": "\\b^(ADD|ADDI|ADDIS|ADDS|AND|ANDI|ANDIS|ANDS|BR|EOR|EORI|LDUR|LDURB|LDURH|LDURSW|LDXR|LSL|LSR|MOVK|MOVZ|ORR|ORRI|STUR|STURB|STURH|STURW|STXR|SUB|SUBI|SUBIS|SUBS|FADDS|FADDD|FCMPS|FCMPD|FDIVS|FDIVD|FMULS|FMULD|FSUBS|FSUBD|LDURS|LDURD|MUL|SDIV|SMULH|STURS|STURD|UDIV|UMULH|CMP|CMPI|LDA|MOV|PRNT|PRNL|HALT|DUMP)\\b",
+                    "begin": "(?i)\\b^(ADD|ADDI|ADDIS|ADDS|AND|ANDI|ANDIS|ANDS|BR|EOR|EORI|LDUR|LDURB|LDURH|LDURSW|LDXR|LSL|LSR|MOVK|MOVZ|ORR|ORRI|STUR|STURB|STURH|STURW|STXR|SUB|SUBI|SUBIS|SUBS|FADDS|FADDD|FCMPS|FCMPD|FDIVS|FDIVD|FMULS|FMULD|FSUBS|FSUBD|LDURS|LDURD|MUL|SDIV|SMULH|STURS|STURD|UDIV|UMULH|CMP|CMPI|LDA|MOV|PRNT|PRNL|HALT|DUMP)\\b",
                     "end": "$",
                     "beginCaptures": {
                         "0": {
@@ -69,7 +69,7 @@
         },
         "branch": {
             "name": "branch.LEGv8",
-            "begin": "\\b^B\\.(EQ|NE|LT|LE|GT|GE|HI|HS|LO|LS|MI|PL|VS|VC)?\\b",
+            "begin": "(?i)\\b^B\\.(EQ|NE|LT|LE|GT|GE|HI|HS|LO|LS|MI|PL|VS|VC)?\\b",
             "end": "$",
             "beginCaptures": {
                 "0": {
@@ -86,7 +86,7 @@
             ]
         },
         "branchCond": {
-            "begin": "\\b^(B|BL|CBZ|CBNZ)\\b",
+            "begin": "(?i)\\b^(B|BL|CBZ|CBNZ)\\b",
             "end": "$",
             "beginCaptures": {
                 "0": {

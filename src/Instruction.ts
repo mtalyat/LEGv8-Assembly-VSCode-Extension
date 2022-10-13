@@ -13,7 +13,7 @@ export class Instruction {
 
     public constructor(core: CoreInstruction, line: Line) {
         // get the mnemonic
-        this._mnemonic = line.getLabel() as InstructionMnemonic;
+        this._mnemonic = line.getLabel().toUpperCase() as InstructionMnemonic;
 
         // get the argument values
         let values = core.extractArgValuesFromLine(line);
