@@ -1,3 +1,6 @@
+/**
+ * The names of all Instructions in LEGv8.
+ */
 export enum InstructionMnemonic {
     Empty = "",
     ADD = "ADD",
