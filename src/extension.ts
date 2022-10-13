@@ -43,9 +43,11 @@ export function activate(context: vscode.ExtensionContext) {
 				sim = Parser.parseSimulation(document.getText(new vscode.Range(start, end)));
 			}
 
+			vscode.window.showInformationMessage("Starting program.");
 			console.log("Program start.");
 			sim.run();
 			console.log(`Program stop. Executed in ${sim.executionTime()}ms.`);
+			vscode.window.showInformationMessage(`Program finished in ${sim.executionTime()}ms.`);
 		}
 
 		//vscode.window.showInformationMessage('Hello World from LEGv8 Assembly!');
