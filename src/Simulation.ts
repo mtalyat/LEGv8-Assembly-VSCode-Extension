@@ -181,7 +181,7 @@ export class Simulation {
             let instruction = this._instructions[this._executionIndex];
 
             // debug
-            //console.log(instruction.toString());
+            // console.log(instruction.toString());
 
             // increment instruction index
             this._executionIndex++;
@@ -213,12 +213,23 @@ export class Simulation {
     }
 
     // runs the program synthronously
-    public run(): void {
-        // start the simulation
-        this.start();
+    public async run(): Promise<Simulation> {
+        await new Promise(async (resolve, reject) => {
+            // start the simulation
+            this.start();
 
-        // step through it
-        while (this.step()) { }
+            // setTimeout(() => {
+            //     reject("Program timed out.");
+            // }, 10);
+
+            // step through it
+            while (this.step()) { }
+
+            // return this
+            resolve(this);
+        });
+
+        return this;
     }
 
     public branch(index: number): void {
@@ -280,7 +291,7 @@ export class Simulation {
 
     // prints the text to the screen
     public output(text: string): void {
-        //console.log(text);
+        console.log(text);
         Output.writeLine(text);
     }
 

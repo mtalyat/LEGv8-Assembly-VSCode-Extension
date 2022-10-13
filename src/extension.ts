@@ -26,14 +26,17 @@ export function activate(context: vscode.ExtensionContext) {
 		const editor = vscode.window.activeTextEditor;
 
 		if (editor) {
+			// there is an editor
+
+			const document = editor.document;
 			Output.show();
 			Output.clear();
 
-			const document = editor.document;
+
 			const start = editor.selection.start;
 			const end = editor.selection.end;
 
-			let sim;
+			let sim: Simulation;
 
 			if (start.isEqual(end)) {
 				// if nothing selected, run the entire document
@@ -43,15 +46,18 @@ export function activate(context: vscode.ExtensionContext) {
 				sim = Parser.parseSimulation(document.getText(new vscode.Range(start, end)));
 			}
 
-			vscode.window.showInformationMessage("Starting program.");
+			vscode.window.showInformationMessage(`Running ${document.fileName.substring(document.fileName.lastIndexOf('\\') + 1)}...`);
 			console.log("Program start.");
-			sim.run();
-			console.log(`Program stop. Executed in ${sim.executionTime()}ms.`);
-			vscode.window.showInformationMessage(`Program finished in ${sim.executionTime()}ms.`);
+			sim.run().then((fin: Simulation) => {
+				console.log(`Program stop. Executed in ${fin.executionTime()}ms.`);
+				vscode.window.showInformationMessage(`Program finished in ${fin.executionTime()}ms.`);
+			}, (reason) => {
+				console.log(reason);
+				vscode.window.showInformationMessage(reason);
+			});
 		}
-
-		//vscode.window.showInformationMessage('Hello World from LEGv8 Assembly!');
 	});
+
 	// autofill
 	const autofillSnippets = vscode.languages.registerCompletionItemProvider('LEGv8', {
 
@@ -176,29 +182,29 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	// autofill 2
-	const provider2 = vscode.languages.registerCompletionItemProvider(
-		'LEGv8',
-		{
-			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+	// const provider2 = vscode.languages.registerCompletionItemProvider(
+	// 	'LEGv8',
+	// 	{
+	// 		provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 
-				// get all text until the `position` and check if it reads `console.`
-				// and if so then complete if `log`, `warn`, and `error`
-				const linePrefix = document.lineAt(position).text.substr(0, position.character);
-				if (!linePrefix.endsWith('console.')) {
-					return undefined;
-				}
+	// 			// get all text until the `position` and check if it reads `console.`
+	// 			// and if so then complete if `log`, `warn`, and `error`
+	// 			const linePrefix = document.lineAt(position).text.substr(0, position.character);
+	// 			if (!linePrefix.endsWith('console.')) {
+	// 				return undefined;
+	// 			}
 
-				return [
-					new vscode.CompletionItem('log', vscode.CompletionItemKind.Method),
-					new vscode.CompletionItem('warn', vscode.CompletionItemKind.Method),
-					new vscode.CompletionItem('error', vscode.CompletionItemKind.Method),
-				];
-			}
-		},
-		'.' // triggered whenever a '.' is being typed
-	);
+	// 			return [
+	// 				new vscode.CompletionItem('log', vscode.CompletionItemKind.Method),
+	// 				new vscode.CompletionItem('warn', vscode.CompletionItemKind.Method),
+	// 				new vscode.CompletionItem('error', vscode.CompletionItemKind.Method),
+	// 			];
+	// 		}
+	// 	},
+	// 	'.' // triggered whenever a '.' is being typed
+	// );
 	// subscribe commands
-	context.subscriptions.push(disposable, autofillSnippets, provider2);
+	context.subscriptions.push(disposable, autofillSnippets);
 
 	console.log("Commands registered.");
 
