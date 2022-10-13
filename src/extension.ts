@@ -69,11 +69,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 			let core: CoreInstruction;
 			let format: string;
+			let preview: string;
 			let argTypes: string;
 
 			let xIndex: number;
 			let k: number;
 			let sb: string;
+
+			let temp: string;
 
 			for (let i = 0; i < cores.length; i++) {
 				core = cores[i];
@@ -84,6 +87,7 @@ export function activate(context: vscode.ExtensionContext) {
 				xIndex = 0;
 
 				sb = core.getMnemonic().toString() + ' ';
+				preview = sb;
 
 				// go through format, replace X with index of the X
 				for (let j = 0; j < format.length; j++) {
@@ -91,11 +95,14 @@ export function activate(context: vscode.ExtensionContext) {
 					k = k === -1 ? format.length : k;
 
 					// add stuff before X
-					sb += format.substring(j, k);
+					temp = format.substring(j, k);
+					sb += temp;
+					preview += temp;
 
 					// replace X with number, add options if necessary
 					if (xIndex < argTypes.length) {
 						sb += "${" + (xIndex + 1);
+						preview += argTypes[xIndex].toUpperCase();
 						switch (argTypes[xIndex]) {
 							case 'r':
 								sb += registerOptions;
@@ -111,7 +118,7 @@ export function activate(context: vscode.ExtensionContext) {
 					j = k;
 				}
 
-				const c = new vscode.CompletionItem(core.getMnemonic() + ' ' + core.getArgsFormat());
+				const c = new vscode.CompletionItem(preview);
 				c.insertText = new vscode.SnippetString(sb);
 
 				completionItems.push(c);
