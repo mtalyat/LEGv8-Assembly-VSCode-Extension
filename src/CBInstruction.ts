@@ -54,7 +54,7 @@ export class CBInstruction extends Instruction {
                 break;
             case InstructionMnemonic.B_GE:
             case InstructionMnemonic.B_HS:
-                if (sim.zeroFlag() || sim.negativeFlag()) {
+                if (sim.zeroFlag() || !sim.negativeFlag()) {
                     sim.branch(this.getCondBrAddress());
                 }
                 break;
