@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import { off } from "process";
 import { Instruction } from "./Instruction";
+import { Output } from "./Output";
 import { PackedNumber } from "./PackedNumber";
 import { Parser } from "./Parser";
 import { Stopwatch } from "./Stopwatch";
@@ -279,7 +280,8 @@ export class Simulation {
 
     // prints the text to the screen
     public output(text: string): void {
-        console.log(text);
+        //console.log(text);
+        Output.writeLine(text);
     }
 
     private format(text: string): string {

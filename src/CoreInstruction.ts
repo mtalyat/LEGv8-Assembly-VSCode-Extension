@@ -1,6 +1,7 @@
 import { format } from "path";
 import { InstructionMnemonic } from "./InstructionMnemonic";
 import { Line } from "./Line";
+import { Output } from "./Output";
 import { Parser } from "./Parser";
 
 export class CoreInstruction {
@@ -159,7 +160,7 @@ export class CoreInstruction {
 
                     // if undefined, the argument is invalid
                     if (arg === undefined) {
-                        console.log(`Invalid argument "${argStr}" from ${i} to ${i + lineIndex} on line: ${line.toString()}`);
+                        Output.error(`Invalid argument "${argStr}" from ${i} to ${i + lineIndex} on line: ${line.toString()}`);
                         return undefined;
                     }
 
@@ -178,7 +179,7 @@ export class CoreInstruction {
                 splitIndex++;
             } else {
                 // if not found, the syntax is not correct
-                console.log(`Invalid syntax, could not find "${split}" at ${i}, should follow "${this._argsFormat}" on line: ${line.toString()}`);
+                Output.error(`Invalid syntax, could not find "${split}" at ${i}, should follow "${this._argsFormat}" on line: ${line.toString()}`);
                 return undefined;
             }
         }

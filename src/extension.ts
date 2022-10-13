@@ -10,6 +10,7 @@ import {
 } from 'vscode-languageclient/node';
 import { CoreInstruction } from './CoreInstruction';
 import { Simulation } from './Simulation';
+import { Output } from './Output';
 
 let client: LanguageClient;
 
@@ -25,6 +26,10 @@ export function activate(context: vscode.ExtensionContext) {
 		const editor = vscode.window.activeTextEditor;
 
 		if (editor) {
+			Output.show();
+
+			Output.write("Test");
+
 			const document = editor.document;
 			const start = editor.selection.start;
 			const end = editor.selection.end;

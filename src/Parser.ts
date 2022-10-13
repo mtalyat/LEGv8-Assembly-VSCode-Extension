@@ -11,6 +11,7 @@ import { IMInstruction } from './IMInstruction';
 import { RInstruction } from './RInstruction';
 import { ZInstruction } from './ZInstruction';
 import { DInstruction } from './DInstruction';
+import { Output } from './Output';
 
 export class Parser {
     static readonly identifierComments: string = "//";
@@ -66,7 +67,7 @@ export class Parser {
         if (args.length === 7) {
             return new CoreInstruction(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
         } else {
-            console.log(`ERR: Invalid arguments from line '${args.join("...")}' (${args.length})`);
+            Output.error(`Invalid arguments from line '${args.join("...")}' (${args.length})`);
             return null;
         }
     }
@@ -107,7 +108,7 @@ export class Parser {
                     return new Instruction(core, line);
             }
         } else {
-            console.log(`Unrecognized: ${line.toString()}`);
+            Output.error(`Unrecognized: ${line.toString()}`);
         }
 
         return null;
