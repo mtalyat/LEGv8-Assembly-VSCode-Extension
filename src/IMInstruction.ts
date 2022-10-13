@@ -16,10 +16,10 @@ export class IMInstruction extends Instruction {
         switch (this._mnemonic) {
             case InstructionMnemonic.MOVK:
                 let r = this.getRd();
-                sim.setReg(r, (sim.getReg(r) & (~0 << 16)) | this.getMovImmediate());
+                sim.setReg(r, (sim.getReg(r) & (~0n << 16n)) | BigInt(this.getMovImmediate()));
                 break;
             case InstructionMnemonic.MOVZ:
-                sim.setReg(this.getRd(), this.getMovImmediate());
+                sim.setReg(this.getRd(), BigInt(this.getMovImmediate()));
                 break;
 
             default:

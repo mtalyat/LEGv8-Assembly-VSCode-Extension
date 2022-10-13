@@ -14,12 +14,12 @@ export class CBInstruction extends Instruction {
     public override execute(sim: Simulation): void {
         switch (this._mnemonic) {
             case InstructionMnemonic.CBZ:
-                if (sim.getReg(this.getRt()) === 0) {
+                if (sim.getReg(this.getRt()) === 0n) {
                     sim.branch(this.getCondBrAddress());
                 }
                 break;
             case InstructionMnemonic.CBNZ:
-                if (sim.getReg(this.getRt()) !== 0) {
+                if (sim.getReg(this.getRt()) !== 0n) {
                     sim.branch(this.getCondBrAddress());
                 }
                 break;

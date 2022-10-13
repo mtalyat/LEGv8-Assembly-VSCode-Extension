@@ -14,9 +14,9 @@ export class RInstruction extends Instruction {
     }
 
     public override execute(sim: Simulation): void {
-        let left: number;
-        let right: number;
-        let result: number;
+        let left: bigint;
+        let right: bigint;
+        let result: bigint;
 
         switch (this._mnemonic) {
             case InstructionMnemonic.ADD:
@@ -68,13 +68,13 @@ export class RInstruction extends Instruction {
                 sim.setReg(this.getRd(), sim.getReg(this.getRn()) | sim.getReg(this.getRm()));
                 break;
             case InstructionMnemonic.LSL:
-                sim.setReg(this.getRd(), sim.getReg(this.getRn()) << this.getShamt());
+                sim.setReg(this.getRd(), sim.getReg(this.getRn()) << BigInt(this.getShamt()));
                 break;
             case InstructionMnemonic.LSR:
-                sim.setReg(this.getRd(), sim.getReg(this.getRn()) >> this.getShamt());
+                sim.setReg(this.getRd(), sim.getReg(this.getRn()) >> BigInt(this.getShamt()));
                 break;
             case InstructionMnemonic.BR:
-                sim.branch(sim.getReg(this.getRd()));
+                sim.branch(sim.getRegAsNumber(this.getRd()));
                 break;
 
             case InstructionMnemonic.CMP:

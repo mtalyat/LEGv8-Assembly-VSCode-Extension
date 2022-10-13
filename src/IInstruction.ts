@@ -13,9 +13,9 @@ export class IInstruction extends Instruction {
     }
 
     public override execute(sim: Simulation): void {
-        let left: number;
-        let right: number;
-        let result: number;
+        let left: bigint;
+        let right: bigint;
+        let result: bigint;
 
         switch (this._mnemonic) {
             case InstructionMnemonic.ADDI:
@@ -72,15 +72,15 @@ export class IInstruction extends Instruction {
     }
 
     protected override getCodeValues(): number[] {
-        return [this.getOpcode(), this.getAluImmediate(), this.getRn(), this.getRd()];
+        return [this.getOpcode(), Number(this.getAluImmediate()), this.getRn(), this.getRd()];
     }
 
     private getOpcode(): number {
         return this._code.getRange(22, 31);
     }
 
-    private getAluImmediate(): number {
-        return this._code.getRange(10, 21);
+    private getAluImmediate(): bigint {
+        return BigInt(this._code.getRange(10, 21));
     }
 
     private getRn(): number {

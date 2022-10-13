@@ -7,31 +7,83 @@ import { Parser } from "./Parser";
 import { Stopwatch } from "./Stopwatch";
 
 export class Simulation {
+    /**
+     * The number of registers within this Simulation.
+     */
     public static readonly registerCount: number = 32;
 
+    /**
+     * The size of the memory within this Simulation, in bytes.
+     */
     public static readonly memorySize: number = 4096;
 
+    /**
+     * The index of the Zero Register (XZR).
+     */
     public static readonly xzrRegister: number = this.registerCount - 1;
+    /**
+     * The index of the Link Register (LR).
+     */
     public static readonly lrRegister: number = this.registerCount - 2;
+    /**
+     * The index of the Frame Pointer register (FP).
+     */
     public static readonly fpRegister: number = this.registerCount - 3;
+    /**
+     * The index of the Stack Pointer register (SP).
+     */
     public static readonly spRegister: number = this.registerCount - 4;
+    /**
+     * The index of the 0th scratch register (IP0).
+     */
     public static readonly ip0Register: number = 16;
+    /**
+     * The index of the 1st scratch register (IP1).
+     */
     public static readonly ip1Register: number = 17;
 
+    /**
+     * The stopwatch that measures the time of the program when ran.
+     */
     private _stopwatch: Stopwatch;
 
+    /**
+     * Is this Simulation running?
+     */
     private _isRunning: boolean;
 
+    /**
+     * The array of Instructions within this Simulation.
+     */
     private _instructions: Instruction[];
 
+    /**
+     * A list of Instruction indices that logs the stack trace of the program.
+     */
     private _stackTrace: number[];
 
+    /**
+     * The current execution index of the Simulation.
+     */
     private _executionIndex: number;
 
+    /**
+     * A UInt8 array that represents the memory.
+     */
     private readonly _memory: Uint8Array;
-    private readonly _registers: Uint32Array;
+    /**
+     * A UInt64 array that represents the registers.
+     */
+    private readonly _registers: BigInt64Array;
+    /**
+     * A PackedNumber that stores the bits for the flags.
+     */
     private readonly _flags: PackedNumber;
 
+    /**
+     * Creates a new Simulation that will run on the given Instruction array.
+     * @param instructions the instructions that this Simulation will run.
+     */
     public constructor(instructions: Instruction[]) {
         this._stopwatch = new Stopwatch();
 
@@ -44,7 +96,7 @@ export class Simulation {
         this._executionIndex = -1;
 
         this._memory = Buffer.alloc(Simulation.memorySize);
-        this._registers = new Uint32Array(Simulation.registerCount);
+        this._registers = new BigInt64Array(Simulation.registerCount);
         this._flags = new PackedNumber(0);
 
         this.reset();
@@ -54,17 +106,32 @@ export class Simulation {
 
     //#region Registers
 
-    public getReg(index: number): number {
+    public getReg(index: number): bigint {
         const r = this._registers.at(index);
 
         if (r === undefined) {
-            return -1;
+            return -1n;
         } else {
             return r;
         }
     }
 
-    public setReg(index: number, value: number): void {
+    public getRegAsNumber(index: number): number {
+        const r = this._registers.at(index);
+
+        if (r === undefined) {
+            return -1;
+        } else {
+            // cap and return as a number
+            return r > Number.MAX_SAFE_INTEGER ? Number.MAX_SAFE_INTEGER : (r < Number.MIN_SAFE_INTEGER ? Number.MIN_SAFE_INTEGER : Number(r));
+        }
+    }
+
+    public setRegAsNumber(index: number, value: number): void {
+        this.setReg(index, BigInt(value));
+    }
+
+    public setReg(index: number, value: bigint): void {
         // only set if not the zero register, which should always be zero
         if (index !== Simulation.xzrRegister) {
             this._registers[index] = value;
@@ -104,41 +171,67 @@ export class Simulation {
 
     //#region Flags
 
-    public setFlags(result: number, left: number, right: number): void {
-        this._flags.setBit(0, result === 0); // zero flag
+    /**
+     * Sets the flags using the given result from the given left and right operands.
+     * @param result The resulting value from the operation before setting the flags.
+     * @param left The left operand from the operation before setting the flags.
+     * @param right The right operand from the operation before setting the flags.
+     */
+    public setFlags(result: bigint, left: bigint, right: bigint): void {
+        this._flags.setBit(0, result === 0n); // zero flag
         this._flags.setBit(1, result < 0); // negative flag
+
+        // TODO: test carry and overflow conditions, they are likely not correct
         this._flags.setBit(2, (left > 0 && right > 0 && result < left && result < right) || (left < 0 && right < 0 && result > left && result > right)); // carry flag
         this._flags.setBit(3, (left > 0 && right > 0 && result < 0) || (left < 0 && right < 0 && result > 0)); // overflow flag
     }
 
+    /**
+     * Checks if the zero flag is enabled.
+     * @returns true if the zero flag is enabled.
+     */
     public zeroFlag(): boolean {
         return this._flags.getBit(0);
     }
 
+    /**
+     * Checks if the negative flag is enabled.
+     * @returns true if the negative flag is enabled.
+     */
     public negativeFlag(): boolean {
         return this._flags.getBit(1);
     }
 
+    /**
+     * Checks if the carry flag is enabled.
+     * @returns true if the carry flag is enabled.
+     */
     public carryFlag(): boolean {
         return this._flags.getBit(2);
     }
 
+    /**
+     * Checks if the overflow flag is enabled.
+     * @returns true if the overflow flag is enabled.
+     */
     public overflowFlag(): boolean {
         return this._flags.getBit(3);
     }
 
     //#endregion
 
-    // clears the registers, memory, and flags of all of their data
+    /**
+     * Clears the registers, memory, and flags of all of their data.
+     */
     public clear(): void {
         // clear all stored data
         this._memory.fill(0);
-        this._registers.fill(0);
+        this._registers.fill(0n);
         this._flags.setNumber(0);
 
         // set defaults
-        this.setReg(Simulation.spRegister, Simulation.memorySize);
-        this.setReg(Simulation.fpRegister, Simulation.memorySize);
+        this.setReg(Simulation.spRegister, BigInt(Simulation.memorySize));
+        this.setReg(Simulation.fpRegister, BigInt(Simulation.memorySize));
     }
 
     //#endregion
@@ -201,6 +294,10 @@ export class Simulation {
         }
     }
 
+    /**
+     * Stops the Simulation.
+     * @returns 
+     */
     public stop(): void {
         // do nothing if not running
         if (!this._isRunning) {
@@ -212,7 +309,10 @@ export class Simulation {
         this._isRunning = false;
     }
 
-    // runs the program synthronously
+    /**
+     * Runs the program asynchronously.
+     * @returns 
+     */
     public async run(): Promise<Simulation> {
         await new Promise(async (resolve, reject) => {
             // start the simulation
@@ -352,7 +452,7 @@ export class Simulation {
                     output.push(this.getReg(value).toString());
                 } else {
                     // mem value at the given register value pointer position
-                    output.push(this.getMem(this.getReg(value), 1).toString());
+                    output.push(this.getMem(Number(this.getReg(value)), 1).toString());
                 }
             } else {
                 // not valid? just put the inside value

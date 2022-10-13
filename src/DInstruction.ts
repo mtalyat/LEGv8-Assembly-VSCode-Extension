@@ -16,29 +16,29 @@ export class DInstruction extends Instruction {
     public override execute(sim: Simulation): void {
         switch (this._mnemonic) {
             case InstructionMnemonic.LDUR:
-                sim.setReg(this.getRt(), sim.getMem(sim.getReg(this.getRn()) + this.getDtAddress(), 8));
+                sim.setRegAsNumber(this.getRt(), sim.getMem(sim.getRegAsNumber(this.getRn()) + this.getDtAddress(), 8));
                 break;
             case InstructionMnemonic.LDURB:
-                sim.setReg(this.getRt(), sim.getMem(sim.getReg(this.getRn()) + this.getDtAddress(), 1));
+                sim.setRegAsNumber(this.getRt(), sim.getMem(sim.getRegAsNumber(this.getRn()) + this.getDtAddress(), 1));
                 break;
             case InstructionMnemonic.LDURH:
-                sim.setReg(this.getRt(), sim.getMem(sim.getReg(this.getRn()) + this.getDtAddress(), 2));
+                sim.setRegAsNumber(this.getRt(), sim.getMem(sim.getRegAsNumber(this.getRn()) + this.getDtAddress(), 2));
                 break;
             case InstructionMnemonic.LDURSW:
-                sim.setReg(this.getRt(), sim.getMem(sim.getReg(this.getRn()) + this.getDtAddress(), 4));
+                sim.setRegAsNumber(this.getRt(), sim.getMem(sim.getRegAsNumber(this.getRn()) + this.getDtAddress(), 4));
                 break;
 
             case InstructionMnemonic.STUR:
-                sim.setMem(sim.getReg(this.getRn()) + this.getDtAddress(), sim.getReg(this.getRt()), 8);
+                sim.setMem(sim.getRegAsNumber(this.getRn()) + this.getDtAddress(), sim.getRegAsNumber(this.getRt()), 8);
                 break;
             case InstructionMnemonic.STURB:
-                sim.setMem(sim.getReg(this.getRn()) + this.getDtAddress(), sim.getReg(this.getRt()), 1);
+                sim.setMem(sim.getRegAsNumber(this.getRn()) + this.getDtAddress(), sim.getRegAsNumber(this.getRt()), 1);
                 break;
             case InstructionMnemonic.STURH:
-                sim.setMem(sim.getReg(this.getRn()) + this.getDtAddress(), sim.getReg(this.getRt()), 2);
+                sim.setMem(sim.getRegAsNumber(this.getRn()) + this.getDtAddress(), sim.getRegAsNumber(this.getRt()), 2);
                 break;
             case InstructionMnemonic.STURW:
-                sim.setMem(sim.getReg(this.getRn()) + this.getDtAddress(), sim.getReg(this.getRt()), 4);
+                sim.setMem(sim.getRegAsNumber(this.getRn()) + this.getDtAddress(), sim.getRegAsNumber(this.getRt()), 4);
                 break;
 
             case InstructionMnemonic.LDA:
