@@ -12,7 +12,7 @@ export enum InstructionMnemonic {
     B_EQ = "B.EQ",
     B_NE = "B.NE",
     B_LT = "B.LT",
-    B_LE = "B.LT",
+    B_LE = "B.LE",
     B_GT = "B.GT",
     B_GE = "B.GE",
     B_HI = "B.HI",

@@ -4,21 +4,36 @@ import { InstructionMnemonic } from "./InstructionMnemonic";
 import { Simulation } from "./Simulation";
 
 export class BInstruction extends Instruction {
-    protected setCode(core: CoreInstruction, values: number[]): void {
-        console.log(`${core.mnemonic}: ${values.join(", ")};`);
+    protected setCodes(core: CoreInstruction, values: number[]): void {
+        super.setCodes(core, values);
+        this._code.setRange(26, 31, core.getOpCodeMin());
+        this._code.setRange(0, 25, values[0]);
     }
 
     public override execute(sim: Simulation): void {
-        switch (this.mnemonic) {
+        switch (this._mnemonic) {
             case InstructionMnemonic.B:
-
+                sim.branch(this.getBrAddress());
                 break;
             case InstructionMnemonic.BL:
-
+                sim.setReg(Simulation.lrRegister, sim.index() + 1);
+                sim.branch(this.getBrAddress());
                 break;
             default:
                 this.fail();
                 break;
         }
+    }
+
+    protected override getCodeValues(): number[] {
+        return [this.getOpcode(), this.getBrAddress()];
+    }
+
+    private getOpcode(): number {
+        return this._code.getRange(26, 31);
+    }
+
+    private getBrAddress(): number {
+        return this._code.getRange(0, 25);
     }
 }

@@ -31,6 +31,10 @@ export class PackedNumber {
         return this.get(start, end - start + 1);
     }
 
+    public getBit(offset: number): boolean {
+        return this.get(offset, 1) !== 0;
+    }
+
     //#endregion
 
     //#region  set
@@ -54,9 +58,28 @@ export class PackedNumber {
         this.set(start, data, end - start + 1);
     }
 
+    public setBit(offset: number, data: boolean): void {
+        this.set(offset, data ? 1 : 0, 1);
+    }
+
     //#endregion
 
-    public toString(): string {
-        return this.value.toString(2);
+    public toString(padding: number): string {
+        if (padding === undefined) {
+            return this.value.toString();
+        }
+
+        let str = this.value.toString(2);
+
+        if (str.startsWith('-')) {
+            // remove negative sign 
+            str = str.substring(1);
+
+            // add ones
+            return str.padStart(padding, '1');
+        } else {
+            // add zeros
+            return str.padStart(padding, '0');
+        }
     }
 }

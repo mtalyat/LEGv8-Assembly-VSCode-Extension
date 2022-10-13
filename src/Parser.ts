@@ -49,18 +49,18 @@ export class Parser {
 
             // if a valid core instruction, add it to the array
             if (core) {
-                this._cores.set(core.mnemonic, core);
+                this._cores.set(core.getMnemonic(), core);
             }
         }
     }
 
     public static parseCoreInstruction(text: string): CoreInstruction | null {
         // split by commas not within strings
-        let args = text.split(new RegExp(',(?=(?:[^"]*"[^"]*")*[^"]*$)'));
+        let args: string[] = text.split(new RegExp(',(?=(?:[^"]*"[^"]*")*[^"]*$)'));
 
         // if the right amount of arguments...
-        if (args.length === 6) {
-            return new CoreInstruction(args[0], args[1], args[2], args[3], args[4], args[5]);
+        if (args.length === 7) {
+            return new CoreInstruction(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
         } else {
             console.log(`ERR: Invalid arguments from line '${args.join("...")}' (${args.length})`);
             return null;
@@ -74,7 +74,7 @@ export class Parser {
     }
 
     // parses an instruction from a line
-    public static parseInstruction(line: Line): Instruction | null {
+    public static parseInstruction(index: number, line: Line): Instruction | null {
         // assume in instruction format
 
         // find matching core instruction
@@ -84,7 +84,7 @@ export class Parser {
             // found the core
 
             // create instruction
-            switch (core.format) {
+            switch (core.getFormat()) {
                 case 'B':
                     return new BInstruction(core, line);
                 case 'CB':
@@ -129,7 +129,7 @@ export class Parser {
 
             line = this.parseLine(textLine, i + 1);
 
-            if (!line.isEmpty()) {
+            if (line !== undefined && !line.isEmpty()) {
                 // check for label
                 if (line.getLabel().endsWith(this.identifierLabelPostfix)) {
                     // must be a label
@@ -153,9 +153,9 @@ export class Parser {
             }
 
             // must be an instruction of some sort
-            instruction = this.parseInstruction(line);
+            instruction = this.parseInstruction(i, line);
 
-            if (instruction !== null) {
+            if (instruction !== undefined && instruction !== null) {
                 instructions.push(instruction);
             }
         }
@@ -163,7 +163,7 @@ export class Parser {
         return new Simulation(instructions);
     }
 
-    public static parseRegister(text: string): number {
+    public static parseRegister(text: string): number | undefined {
         let upperText = text.toUpperCase();
 
         // check for special cases
@@ -188,20 +188,20 @@ export class Parser {
                     let num = this.parseNumber(upperText.substring(1));
 
                     // if a valid number and within the range
-                    if (num >= 0 && num < Simulation.registerCount) {
+                    if (num !== undefined && num >= 0 && num < Simulation.registerCount) {
                         return num;
                     }
                 }
 
                 // invalid argument
-                return -1;
+                return undefined;
         }
     }
 
-    public static parseImmediate(text: string): number {
+    public static parseImmediate(text: string): number | undefined {
         // make sure it starts with the identifier
         if (!text.startsWith(this.identifierImmediatePrefix)) {
-            return -1;
+            return undefined;
         }
 
         // remove the identifier
@@ -210,17 +210,17 @@ export class Parser {
         return this.parseNumber(str);
     }
 
-    private static parseNumber(text: string): number {
+    private static parseNumber(text: string): number | undefined {
         let num = parseInt(text);
 
         if (isNaN(num)) {
-            return -1;
+            return undefined;
         } else {
             return num;
         }
     }
 
-    public static parseLabel(text: string): number {
+    public static parseLabel(text: string): number | undefined {
         let label = text;
 
         // remove ending :, if there is one
@@ -233,9 +233,11 @@ export class Parser {
 
         if (value === undefined) {
             // label does not exist
-            return -1;
+            return undefined;
         } else {
             // label exists
+
+            // return the offset from this index
             return value;
         }
     }

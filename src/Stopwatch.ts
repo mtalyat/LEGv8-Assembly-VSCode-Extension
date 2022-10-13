@@ -5,8 +5,8 @@ export class Stopwatch {
     private _isRunning: boolean;
 
     public constructor() {
-        this._startTime = 0;
-        this._stopTime = 0;
+        this._startTime = 0.0;
+        this._stopTime = 0.0;
         this._isRunning = false;
     }
 

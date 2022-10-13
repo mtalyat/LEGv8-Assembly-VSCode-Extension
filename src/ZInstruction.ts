@@ -13,23 +13,24 @@ export class ZInstruction extends Instruction {
         this.extra = line.getArgs();
     }
 
-    protected setCode(core: CoreInstruction, values: number[]): void {
-        console.log(`${core.mnemonic}: ${this.extra};`);
+    protected setCodes(core: CoreInstruction, values: number[]): void {
+        super.setCodes(core, values);
+        // nothing to set for z, as it is a debugging format and would not exist in real assembly
     }
 
     public override execute(sim: Simulation): void {
-        switch (this.mnemonic) {
+        switch (this._mnemonic) {
             case InstructionMnemonic.PRNT:
-
+                sim.print(this.extra);
                 break;
             case InstructionMnemonic.PRNL:
-
+                sim.output("");
                 break;
             case InstructionMnemonic.HALT:
-
+                sim.halt();
                 break;
             case InstructionMnemonic.DUMP:
-
+                sim.dump();
                 break;
             default:
                 this.fail();

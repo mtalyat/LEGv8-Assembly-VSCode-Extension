@@ -7,107 +7,122 @@ import { Parser } from './Parser';
 
 export class Instruction {
 
-    protected mnemonic: InstructionMnemonic;
+    protected readonly _mnemonic: InstructionMnemonic;
 
-    protected code: PackedNumber;
+    protected readonly _code: PackedNumber;
 
     public constructor(core: CoreInstruction, line: Line) {
         // get the mnemonic
-        this.mnemonic = line.getLabel() as InstructionMnemonic;
+        this._mnemonic = line.getLabel() as InstructionMnemonic;
 
         // get the argument values
-        let values = this.getArgValues(core, line);
+        let values = core.extractArgValuesFromLine(line);
 
         // pack into data
-        this.code = new PackedNumber(0);
-        this.setCode(core, values);
+        this._code = new PackedNumber(0);
+
+        if (values !== undefined) {
+            this.setCodes(core, values);
+        }
     }
 
-    private getArgValues(core: CoreInstruction, line: Line): number[] {
-        //split up
-        let splitFormatting = core.args.split(new RegExp('[{}]'));
-        if (splitFormatting.length >= 3) {
-            splitFormatting = splitFormatting.splice(1, splitFormatting.length - 2); // remove beginning and end
-        }
+    // private getArgValues(index: number, core: CoreInstruction, line: Line): number[] {
+    //     //split up
+    //     let splitFormatting = core.getArgsFormat().split('X');
+    //     if (splitFormatting.length >= 3) {
+    //         splitFormatting = splitFormatting.splice(1, splitFormatting.length - 2); // remove beginning and end
+    //     }
 
-        // even indices are the numbers
-        // odd indices are the splits
+    //     // even indices are the numbers
+    //     // odd indices are the splits
 
-        let rawArgs = line.getArgs();
+    //     let rawArgs = line.getArgs();
 
-        // check if the raw arguments follows the given formatting
-        let typeIndex = 0;
-        let splitIndex = 1;
-        let j: number;
-        let inside: string;
-        let value: number;
+    //     // check if the raw arguments follows the given formatting
+    //     let typeIndex = 0;
+    //     let splitIndex = 1;
+    //     let j: number;
+    //     let inside: string;
+    //     let value: number | null;
 
-        let args: number[] = new Array();
+    //     let args: number[] = new Array();
 
-        for (let i = 0; i < rawArgs.length; i++, typeIndex += 2, splitIndex += 2) {
-            // find next split location
-            if (splitIndex >= splitFormatting.length) {
-                // if out of things to split by, go to end
-                j = rawArgs.length;
-            } else {
-                //console.log(`Splitting by: ${splitFormatting[splitIndex]} for ${core.argTypes[parseInt(splitFormatting[typeIndex])]}`);
-                // split by next thing to split by
-                j = rawArgs.indexOf(splitFormatting[splitIndex], i);
-            }
+    //     for (let i = 0; i < rawArgs.length; i++, typeIndex += 2, splitIndex += 2) {
+    //         // find next split location
+    //         if (splitIndex >= splitFormatting.length) {
+    //             // if out of things to split by, go to end
+    //             j = rawArgs.length;
+    //         } else {
+    //             //console.log(`Splitting by: ${splitFormatting[splitIndex]} for ${core.argTypes[parseInt(splitFormatting[typeIndex])]}`);
+    //             // split by next thing to split by
+    //             j = rawArgs.indexOf(splitFormatting[splitIndex], i);
+    //         }
 
-            // get the inside
-            inside = rawArgs.substring(i, j).trim();
+    //         // get the inside
+    //         inside = rawArgs.substring(i, j).trim();
 
-            // parse based on type
-            switch (core.argTypes[parseInt(splitFormatting[typeIndex])]) {
-                case 'r': // register
-                    value = Parser.parseRegister(inside);
-                    break;
-                case 'i': // immediate (number)
-                    value = Parser.parseImmediate(inside);
-                    break;
-                case 'l': // label
-                    value = Parser.parseLabel(inside);
-                    break;
-                default:
-                    value = -1;
-                    break;
-            }
+    //         // parse based on type
+    //         switch (core.getArgTypes()[parseInt(splitFormatting[typeIndex])]) {
+    //             case 'r': // register
+    //                 value = Parser.parseRegister(inside);
+    //                 break;
+    //             case 'i': // immediate (number)
+    //                 value = Parser.parseImmediate(inside);
+    //                 break;
+    //             case 'l': // label
+    //                 value = Parser.parseLabel(inside, index);
+    //                 break;
+    //             default:
+    //                 value = -1;
+    //                 break;
+    //         }
 
-            // did we get an invalid result?
-            if (value >= 0) {
-                args.push(value);
-            } else {
-                args.push(0);
-                console.log(`Invalid parse: "${inside}" of type ${core.argTypes[parseInt(splitFormatting[typeIndex])]}`);
-            }
+    //         // did we get an invalid result?
+    //         if (value !== null) {
+    //             args.push(value);
+    //         } else {
+    //             args.push(0);
+    //             console.log(`Invalid parse: "${inside}" of type ${core.getArgTypes()[parseInt(splitFormatting[typeIndex])]}`);
+    //         }
 
-            // catch i up to j
-            if (splitIndex >= splitFormatting.length) {
-                // end of loop
-                break;
-            } else {
-                i = j + splitFormatting[splitIndex].length - 1;
-            }
+    //         // catch i up to j
+    //         if (splitIndex >= splitFormatting.length) {
+    //             // end of loop
+    //             break;
+    //         } else {
+    //             i = j + splitFormatting[splitIndex].length - 1;
+    //         }
+    //     }
 
-        }
+    //     return args;
+    // }
 
-        return args;
-    }
-
-    protected setCode(core: CoreInstruction, values: number[]): void {
-        console.log(`Attempting to set codes on an empty Instruction (${core.mnemonic}).`);
+    protected setCodes(core: CoreInstruction, values: number[]): void {
+        //console.log(`${core.getMnemonic()}: ${values.join(", ")};`);
+        this._code.setNumber(0);
     }
 
     public execute(sim: Simulation): void {
-        console.log("Attempting to execute an empty Instruction.");
+        console.log(`Nothing executed for ${this.toString()}.`);
     }
 
     protected fail(): void {
-        console.log(`Failed to execute ${this.mnemonic} in ${this.constructor.name}`);
+        console.log(`Failed to execute ${this._mnemonic} in ${this.constructor.name}`);
+    }
+
+    public getCode(): number {
+        return this._code.getNumber();
+    }
+
+    public getCodeString(): string {
+        return this._code.toString(32);
+    }
+
+    protected getCodeValues(): number[] {
+        return new Array();
     }
 
     public toString(): string {
-        return `${this.mnemonic}:\t${this.code}`;
+        return `${this._mnemonic.toString().padEnd(6)} ${this.getCodeValues().join(' ')}`;
     }
 }
