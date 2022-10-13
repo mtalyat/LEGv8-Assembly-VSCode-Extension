@@ -8,7 +8,8 @@ export class ZInstruction extends Instruction {
     private extra: string;
 
     public constructor(core: CoreInstruction, line: Line) {
-        super(core, line);
+        // ignore args so super class does not parse it
+        super(core, new Line(line.getLabel(), line.getLineNumber()));
 
         this.extra = line.getArgs();
     }

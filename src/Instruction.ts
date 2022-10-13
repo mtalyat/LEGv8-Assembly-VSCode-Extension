@@ -16,13 +16,16 @@ export class Instruction {
         this._mnemonic = line.getLabel().toUpperCase() as InstructionMnemonic;
 
         // get the argument values
-        let values = core.extractArgValuesFromLine(line);
-
         // pack into data
         this._code = new PackedNumber(0);
 
-        if (values !== undefined) {
-            this.setCodes(core, values);
+        // get the argument values
+        if (line.getArgs().length !== 0) {
+            let values = core.extractArgValuesFromLine(line);
+
+            if (values !== undefined) {
+                this.setCodes(core, values);
+            }
         }
     }
 

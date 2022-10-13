@@ -60,7 +60,7 @@
         },
         "label": {
             "name": "entity.name.tag",
-            "match": "\\b^([a-z]|[A-Z]|_)+:",
+            "match": "\\b^([a-z]|[A-Z]|_|[0-9])+:",
             "patterns": [
                 {
                     "include": "#comment"
@@ -107,7 +107,7 @@
         },
         "branchLabel": {
             "name": "entity.name.tag",
-            "match": "\\b([a-z]|[A-Z]|_)+\\b"
+            "match": "\\b([a-z]|[A-Z]|_|[0-9])+\\b"
         },
         "comment": {
             "name": "comment.LEGv8",

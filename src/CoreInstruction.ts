@@ -160,7 +160,7 @@ export class CoreInstruction {
 
                     // if undefined, the argument is invalid
                     if (arg === undefined) {
-                        Output.error(`Invalid argument "${argStr}" from ${i} to ${i + lineIndex} on line: ${line.toString()}`);
+                        Output.error(`Invalid argument "${argStr}" on line: ${line.toString()}`);
                         return undefined;
                     }
 

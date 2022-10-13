@@ -27,8 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 		if (editor) {
 			Output.show();
-
-			Output.write("Test");
+			Output.clear();
 
 			const document = editor.document;
 			const start = editor.selection.start;
@@ -44,8 +43,9 @@ export function activate(context: vscode.ExtensionContext) {
 				sim = Parser.parseSimulation(document.getText(new vscode.Range(start, end)));
 			}
 
+			console.log("Program start.");
 			sim.run();
-			console.log(`Program executed in ${sim.executionTime()}ms.`);
+			console.log(`Program stop. Executed in ${sim.executionTime()}ms.`);
 		}
 
 		//vscode.window.showInformationMessage('Hello World from LEGv8 Assembly!');
@@ -125,6 +125,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 				const c = new vscode.CompletionItem(preview);
 				c.insertText = new vscode.SnippetString(sb);
+				c.commitCharacters = ['\t', '\r', '\n', '\r\n'];
 
 				completionItems.push(c);
 			}

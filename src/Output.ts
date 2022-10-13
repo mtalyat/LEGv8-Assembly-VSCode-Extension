@@ -17,7 +17,9 @@ export class Output {
     }
 
     public static error(text: string): void {
-        this.writeLine("ERROR: " + text);
+        const t = "ERROR: " + text;
+        this.writeLine(t);
+        console.log(t);
     }
 
     public static write(text: string): void {
