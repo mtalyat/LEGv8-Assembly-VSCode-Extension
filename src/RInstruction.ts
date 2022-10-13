@@ -3,6 +3,9 @@ import { Instruction } from "./Instruction";
 import { InstructionMnemonic } from "./InstructionMnemonic";
 import { Simulation } from "./Simulation";
 
+/**
+ * Register Instruction.
+ */
 export class RInstruction extends Instruction {
     protected setCodes(core: CoreInstruction, values: number[]): void {
         super.setCodes(core, values);

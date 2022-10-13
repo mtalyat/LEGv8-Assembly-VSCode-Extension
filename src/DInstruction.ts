@@ -3,6 +3,9 @@ import { Instruction } from "./Instruction";
 import { InstructionMnemonic } from "./InstructionMnemonic";
 import { Simulation } from "./Simulation";
 
+/**
+ * Data Transfer Instruction.
+ */
 export class DInstruction extends Instruction {
     protected setCodes(core: CoreInstruction, values: number[]): void {
         super.setCodes(core, values);

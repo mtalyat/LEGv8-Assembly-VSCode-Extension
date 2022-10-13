@@ -4,6 +4,9 @@ import { InstructionMnemonic } from "./InstructionMnemonic";
 import { Line } from "./Line";
 import { Simulation } from "./Simulation";
 
+/**
+ * Debugging Instruction.
+ */
 export class ZInstruction extends Instruction {
     private extra: string;
 
