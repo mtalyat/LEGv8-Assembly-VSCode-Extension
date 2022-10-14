@@ -1,8 +1,6 @@
 # Change Log
 
-All notable changes to the "legv8-assembly" extension will be documented in this file.
-
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+All notable changes to the "LEGv8 Assembly" extension will be documented in this file.
 
 ## [Unreleased]
 

@@ -9,12 +9,10 @@ LEGv8 itself is a subset of the ARM assembly architecture. LEG is not used in re
 
 ## Table of Contents
 
-- [LEGv8 Assembly Extension for Visual Studio Code](#legv8-assembly-extension-for-visual-studio-code)
-  - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Known Issues](#known-issues)
   - [Release Notes](#release-notes)
-    - [Unreleased](#unreleased)
+    - [[Unreleased]](#unreleased)
   - [References](#references)
 
 ---
@@ -37,7 +35,7 @@ Many things from LEG have not been fully implemented or tested. Those things are
 
 ## Release Notes
 
-### Unreleased
+### [Unreleased]
 
 ## References
 

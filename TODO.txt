@@ -1,9 +1,0 @@
-TODO:
-
-Simulation:
-* setFlags
-    - test carry and overflow flag setting
-CBInstruction:
-* execute
-    - B.VS
-    - B.VC
