@@ -215,7 +215,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 function activateLanguageServerProtocol(context: vscode.ExtensionContext): void {
-	let serverModule = context.asAbsolutePath(path.join('server', 'src', 'server.js'));
+	let serverModule = context.asAbsolutePath(path.join('src', 'server', 'src', 'server.js'));
 	let debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
 
 	// If the extension is launched in debug mode then the debug server options are used
