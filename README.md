@@ -1,71 +1,49 @@
-# legv8-assembly README
+LEGv8 Assembly Extension for Visual Studio Code
+======
 
-This is the README for your extension "legv8-assembly". After writing up a brief description, we recommend including the following sections.
+This is a LEGv8 Assembly extension for Visual Studio Code. This extension provides some basic functionality, including, but not limited to: syntax highlighting, autocomplete options, and the ability to simulate a small environment for the assembly to run. 
 
-## Features
-
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+LEGv8 itself is a subset of the ARM assembly architecture. LEG is not used in real applications- it is used merely to be a teaching tool to help make the learning process easier in regards to assembly. The goal of this repository, and this extension, is to help in those efforts to those who are interested in learning assembly.
 
 ---
 
-## Following extension guidelines
+## Table of Contents
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+- [LEGv8 Assembly Extension for Visual Studio Code](#legv8-assembly-extension-for-visual-studio-code)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Known Issues](#known-issues)
+  - [Release Notes](#release-notes)
+    - [Unreleased](#unreleased)
+  - [References](#references)
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+---
 
-## Working with Markdown
+## Features
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+The LEGv8 Assembly extension has the following features:
+* Syntax highlighting.
+* Autocomplete/autofill options for all of the implemented instructions.
+* A command to run a simulation of the selected text/file.
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+To see a list of all instructions and features implemented within the simulation, check out the wiki tab.
 
-## For more information
+## Known Issues
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+Many things from LEG have not been fully implemented or tested. Those things are as follows:
+* Overflow and carry flag setting/comparisons
+* Floating point instructions
+* Arithmetic instructions
 
-**Enjoy!**
+## Release Notes
+
+### Unreleased
+
+## References
+
+The following is a list of useful references that were used for the understanding of LEG Assembly, as well as the creation of this extension:
+
+* [LEGv8 Reference Data Cheat Sheet](https://www.usna.edu/Users/cs/lmcdowel/courses/ic220/S20/resources/ARM-v8-Quick-Reference-Guide.pdf)
+* [Computer Organization and Design: The Hardware/Software Interface, ARM® Edition](https://www.amazon.com/Computer-Organization-Design-ARM-Architecture-ebook/dp/B01H1DCRRC)
+
+---
