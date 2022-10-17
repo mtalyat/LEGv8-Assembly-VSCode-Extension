@@ -12,7 +12,6 @@ LEGv8 itself is a subset of the ARM assembly architecture. LEG is not used in re
   - [Features](#features)
   - [Known Issues](#known-issues)
   - [Release Notes](#release-notes)
-    - [[Unreleased]](#unreleased)
   - [References](#references)
 
 ---
@@ -33,9 +32,13 @@ Many things from LEG have not been fully implemented or tested. Those things are
 * Floating point instructions
 * Arithmetic instructions
 
+If you find any new issues, please create an issue for them on the [Github repository](https://github.com/mtalyat/LEGv8-Assembly-VSCode-Extension).
+
 ## Release Notes
 
-### [Unreleased]
+### 1.0.0
+
+- Initial Release
 
 ## References
 
