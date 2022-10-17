@@ -11,6 +11,8 @@ import {
 import { CoreInstruction } from './CoreInstruction';
 import { Simulation } from './Simulation';
 import { Output } from './Output';
+import { LEGv8Runtime } from './LEGv8Runtime';
+//import { MainPanel, REPLSerializer } from './webview';
 
 let client: LanguageClient;
 
@@ -207,6 +209,79 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposable, autofillSnippets);
 
 	console.log("Commands registered.");
+
+	// const initRuntime = (cscsRuntime: LEGv8Runtime) => {
+
+	// 	cscsRuntime.on('onInfoMessage', (msg: string) => {
+	// 		vscode.window.showInformationMessage(msg);
+	// 	});
+	// 	cscsRuntime.on('onStatusChange', (msg: string) => {
+	// 		//MainPanel.status = msg;
+
+	// 		// leave commented out
+	// 		//if (MainPanel.currentPanel) {
+	// 		//	MainPanel.currentPanel.update();
+	// 		//}
+	// 		vscode.window.setStatusBarMessage(msg);
+	// 	});
+	// 	cscsRuntime.on('onWarningMessage', (msg: string) => {
+	// 		vscode.window.showWarningMessage('REPL: ' + msg);
+	// 	});
+	// 	cscsRuntime.on('onErrorMessage', (msg: string) => {
+	// 		vscode.window.showErrorMessage('REPL: ' + msg);
+	// 	});
+
+	// 	// cscsRuntime.on('onReplMessage', (data: string) => {
+	// 	// 	// if (init && MainPanel.init) {
+	// 	// 	// 	return;
+	// 	// 	// }
+
+	// 	// 	let fromWebview = cscsRuntime.lastReplSource() === '' && MainPanel.currentPanel;
+
+	// 	// 	if (!fromWebview) {
+	// 	// 		// outputChannel.append('REPL> ');
+	// 	// 	}
+	// 	// 	let lines = data.split('\\n');
+	// 	// 	if (lines.length === 1) {
+	// 	// 		lines = data.split('\n');
+	// 	// 	}
+	// 	// 	let counter = 0;
+	// 	// 	for (let i = 0; i < lines.length; i++) {
+	// 	// 		let line = lines[i].trim();
+	// 	// 		if (line === "repl") {
+	// 	// 			continue;
+	// 	// 		}
+	// 	// 		if (line === "" && i === lines.length - 1) {
+	// 	// 			break;
+	// 	// 		}
+	// 	// 		// if (fromWebview && MainPanel.currentPanel) {
+	// 	// 		// 	MainPanel.currentPanel.sendReplResponse(line);
+	// 	// 		// } else {
+	// 	// 		// 	outputChannel.appendLine(line);
+	// 	// 		// }
+
+	// 	// 		counter++;
+	// 	// 		if (line !== '' && !line.startsWith('Exception thrown')) {
+	// 	// 			if (!line.startsWith('"') && isNaN(Number(line))) {
+	// 	// 				line = '"' + line + '"';
+	// 	// 			}
+	// 	// 			//respHistory.push(line);
+	// 	// 		}
+	// 	// 	}
+	// 	// 	if (fromWebview) {
+	// 	// 		return;
+	// 	// 	}
+	// 	// 	if (counter === 0) {
+	// 	// 		outputChannel.appendLine("");
+	// 	// 	}
+	// 	// 	outputChannel.show(true);
+	// 	// });
+	// };
+
+	// let msgRuntime = LEGv8Runtime.getInstance(true);
+	// initRuntime(msgRuntime);
+
+
 
 	// connect to language server
 	activateLanguageServerProtocol(context);

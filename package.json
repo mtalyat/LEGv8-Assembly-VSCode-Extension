@@ -7,14 +7,21 @@
     "vscode": "^1.72.0"
   },
   "dependencies": {
-    "vscode-languageclient": "^7.0.0"
+    "vscode-languageclient": "^7.0.0",
+    "await-notify": "1.0.1",
+    "vscode-debugadapter": "1.33.0"
   },
   "categories": [
     "Programming Languages"
   ],
+  "repository": {
+    "url": "https://github.com/mtalyat/LEGv8-Assembly-VSCode-Extension",
+    "type": "git"
+  },
   "activationEvents": [
     "onCommand:legv8-assembly.runLegV8",
-    "onLanguage:LEGv8"
+    "onLanguage:LEGv8",
+    "onDebug"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -39,6 +46,38 @@
           ".legv8assembly"
         ],
         "configuration": "./language-configuration.json"
+      }
+    ],
+    "breakpoints": [
+      {
+        "language": "LEGv8"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "LEGv8",
+        "label": "LEGv8 Assembly Debug",
+        "program": "./out/debugAdapter.js",
+        "runtime": "node",
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program"
+            ]
+          },
+          "properties": {
+            "program": {
+              "type": "string",
+              "description": "Absolute path to a text file.",
+              "default": "${workspaceFolder}/${command:AskForProgramName}"
+            }
+          },
+          "serverPort": {
+            "type": "number",
+            "description": "The number of the server port to connect to.",
+            "default": 13337
+          }
+        }
       }
     ],
     "grammars": [
