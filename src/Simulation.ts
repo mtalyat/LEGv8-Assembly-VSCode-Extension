@@ -2,6 +2,7 @@ import { exec } from "child_process";
 import { off } from "process";
 import { Instruction } from "./Instruction";
 import { Output } from "./Output";
+import { PackedBigInt } from "./PackedBigInt";
 import { PackedNumber } from "./PackedNumber";
 import { Parser } from "./Parser";
 import { Stopwatch } from "./Stopwatch";
@@ -95,7 +96,7 @@ export class Simulation {
 
         this._executionIndex = -1;
 
-        this._memory = Buffer.alloc(Simulation.memorySize);
+        this._memory = new Uint8Array(Simulation.memorySize);
         this._registers = new BigInt64Array(Simulation.registerCount);
         this._flags = new PackedNumber(0);
 
@@ -142,28 +143,28 @@ export class Simulation {
 
     //#region Memory
 
-    public getMem(index: number, size: number): number {
+    public getMem(index: number, size: number): bigint {
         if (index === undefined) {
-            return -1;
+            return -1n;
         } else {
-            let packed = new PackedNumber(0);
+            let packed = new PackedBigInt(0n);
 
             // pack memory bytes into the number
             for (let i = 0; i < size; i++) {
-                packed.setByte(i, this._memory[index + i], 1);
+                packed.setByte(BigInt(i), this._memory[index + i], 1n);
             }
 
             return packed.getNumber();
         }
     }
 
-    public setMem(index: number, value: number, size: number): void {
+    public setMem(index: number, value: bigint, size: number): void {
         // turn value into a packed number
-        let packed = new PackedNumber(value);
+        let packed = new PackedBigInt(value);
 
         // unpack it into memory
         for (let i = 0; i < size; i++) {
-            this._memory[index + i] = packed.getByte(i, 1);
+            this._memory[index + i] = packed.getByte(BigInt(i), 1n);
         }
     }
 
