@@ -31,6 +31,7 @@ CoMPare Immediate,CMPI,I,0,"_, _",01,ri
 Dump,DUMP,Z,0,,,
 Exclusive OR,EOR,R,650,"_, _, _",013,rrr
 Exclusive OR Immediate,EORI,I,690-691,"_, _, _",012,rri
+Halt,HALT,Z,0,,,
 LoaD Address,LDA,D,0,"_, _",01,ri
 LoaD Register Unscaled offset,LDUR,D,7C2,"_, [_, _]",012,rri
 LoaD Byte Unscaled offset,LDURB,D,1C2,"_, [_, _]",012,rri
