@@ -396,6 +396,21 @@ export class Simulation {
     }
 
     private format(text: string): string {
+        let value: number | undefined;
+
+        // check for just a register
+        if (!text.includes(' ')) {
+            // only one argument, if a register, print that
+            value = Parser.parseRegister(text);
+
+            if (value !== undefined) {
+                // it was a valid register, print that value
+                return this.getReg(value).toString();
+            }
+        }
+
+        // more than just a register, do normal formatting
+
         let output: string[] = new Array();
 
         let cbIndex: number; // curly bracket index
@@ -404,7 +419,6 @@ export class Simulation {
         let closing: string;
 
         let inside: string;
-        let value: number | undefined;
 
         // search for { } and replace given register value inside
         // search for [ ] and replace memory at the given register value inside
