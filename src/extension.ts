@@ -284,9 +284,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 	// connect to language server
-	activateLanguageServerProtocol(context);
+	// activateLanguageServerProtocol(context);
 
-	console.log("Connected to LSP.");
+	// console.log("Connected to LSP.");
 }
 
 function activateLanguageServerProtocol(context: vscode.ExtensionContext): void {

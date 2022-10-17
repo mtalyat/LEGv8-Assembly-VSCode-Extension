@@ -6,6 +6,7 @@
   "engines": {
     "vscode": "^1.72.0"
   },
+  "publisher": "mtalyat",
   "dependencies": {
     "vscode-languageclient": "^7.0.0",
     "await-notify": "1.0.1",
