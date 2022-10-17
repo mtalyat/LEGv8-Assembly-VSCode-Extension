@@ -37,9 +37,15 @@ If you find any new issues, please create an issue for them on the [Github repos
 
 ## Release Notes
 
+### 1.0.1
+
+- Fixed support for HALT, which currently does the same as DUMP.
+- Added `PRNT reg`, where `reg` is a register to be printed.
+- Fixed bug with memory not being set or read correctly.
+
 ### 1.0.0
 
-- Initial Release
+- Initial release
 
 ## References
 
