@@ -57,7 +57,7 @@
     "debuggers": [
       {
         "type": "LEGv8",
-        "label": "LEGv8 Assembly Debug",
+        "label": "LEGv8 Assembly Debugger",
         "program": "./out/debugAdapter.js",
         "runtime": "node",
         "configurationAttributes": {
@@ -90,7 +90,7 @@
     ],
     "configuration": {
       "type": "object",
-      "title": "Example configuration",
+      "title": "LEGv8 configuration",
       "properties": {
         "languageServerExample.maxNumberOfProblems": {
           "scope": "resource",

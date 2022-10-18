@@ -17,6 +17,11 @@ import { LEGv8Runtime } from './LEGv8Runtime';
 let client: LanguageClient;
 
 export function activate(context: vscode.ExtensionContext) {
+	// debug warnings
+	process.on('warning', (warning) => {
+		console.log(warning.stack);
+	});
+
 	// load core instructions
 	Parser.loadCoreInstructions("../resources/core-instructions.csv");
 
@@ -284,9 +289,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 	// connect to language server
-	// activateLanguageServerProtocol(context);
+	activateLanguageServerProtocol(context);
 
-	// console.log("Connected to LSP.");
+	console.log("Connected to LSP.");
 }
 
 function activateLanguageServerProtocol(context: vscode.ExtensionContext): void {
@@ -307,7 +312,7 @@ function activateLanguageServerProtocol(context: vscode.ExtensionContext): void 
 	// Options to control the language client
 	let clientOptions: LanguageClientOptions = {
 		// Register the server for plain text documents
-		documentSelector: [{ scheme: 'file', language: 'plaintext' }],
+		documentSelector: [{ scheme: 'file', language: 'LEGv8' }],
 		synchronize: {
 			// Notify the server about file changes to '.clientrc files contained in the workspace
 			fileEvents: vscode.workspace.createFileSystemWatcher('**/.clientrc')
@@ -316,8 +321,8 @@ function activateLanguageServerProtocol(context: vscode.ExtensionContext): void 
 
 	// Create the language client and start the client.
 	client = new LanguageClient(
-		'languageServerExample',
-		'Language Server Example',
+		'LEGv8LanguageServer',
+		'LEGv8 Assembly Language Server',
 		serverOptions,
 		clientOptions
 	);

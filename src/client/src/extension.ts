@@ -47,14 +47,16 @@ export function activate(context: ExtensionContext) {
 
     // Create the language client and start the client.
     client = new LanguageClient(
-        'languageServerExample',
-        'Language Server Example',
+        'LEGv8LanguageServer',
+        'LEGv8 Assembly Language Server',
         serverOptions,
         clientOptions
     );
 
     // Start the client. This will also launch the server
     client.start();
+
+    console.log("Client started");
 }
 
 export function deactivate(): Thenable<void> | undefined {
