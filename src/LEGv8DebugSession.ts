@@ -471,9 +471,9 @@ export class LEGv8DebugSession extends LoggingDebugSession {
         const container = this._variableHandles.get(args.variablesReference);
         const rv = container === 'locals'
             ? this._runtime.getLocalVariable(args.name)
-            : container instanceof RuntimeVariable && container.value instanceof Array
-                ? container.value.find(v => v.name === args.name)
-                : undefined;
+            // : container instanceof RuntimeVariable && container.value instanceof Array
+            //     ? container.value.find(v => v.name === args.name)
+            : undefined;
 
         if (rv) {
             rv.value = this.convertToRuntime(args.value);
@@ -571,7 +571,7 @@ export class LEGv8DebugSession extends LoggingDebugSession {
                 if (args.expression.startsWith('$')) {
                     rv = this._runtime.getLocalVariable(args.expression.substr(1));
                 } else {
-                    rv = new RuntimeVariable('eval', this.convertToRuntime(args.expression));
+                    rv = new RuntimeVariable('eval', true, 0, this._runtime.Simulation);
                 }
                 break;
         }
@@ -812,20 +812,21 @@ export class LEGv8DebugSession extends LoggingDebugSession {
 
         value = value.trim();
 
-        if (value === 'true') {
-            return true;
-        }
-        if (value === 'false') {
-            return false;
-        }
-        if (value[0] === '\'' || value[0] === '"') {
-            return value.substr(1, value.length - 2);
-        }
-        const n = parseFloat(value);
-        if (!isNaN(n)) {
-            return n;
-        }
-        return value;
+        // if (value === 'true') {
+        //     return true;
+        // }
+        // if (value === 'false') {
+        //     return false;
+        // }
+        // if (value[0] === '\'' || value[0] === '"') {
+        //     return value.substr(1, value.length - 2);
+        // }
+        // const n = parseFloat(value);
+        // if (!isNaN(n)) {
+        //     return n;
+        // }
+        // return value;
+        return BigInt(parseInt(value));
     }
 
     private convertFromRuntime(v: RuntimeVariable): DebugProtocol.Variable {
@@ -842,38 +843,43 @@ export class LEGv8DebugSession extends LoggingDebugSession {
             // a "lazy" variable needs an additional click to retrieve its value
 
             dapVariable.value = 'lazy var';		// placeholder value
-            v.reference ??= this._variableHandles.create(new RuntimeVariable('', [new RuntimeVariable('', v.value)]));
-            dapVariable.variablesReference = v.reference;
+            // v.reference ??= this._variableHandles.create(new RuntimeVariable('', [new RuntimeVariable('', v.value)]));
+            // dapVariable.variablesReference = v.reference;
+            dapVariable.variablesReference = 0;
             dapVariable.presentationHint = { lazy: true };
         } else {
 
-            if (Array.isArray(v.value)) {
-                dapVariable.value = 'Object';
-                v.reference ??= this._variableHandles.create(v);
-                dapVariable.variablesReference = v.reference;
-            } else {
+            // if (Array.isArray(v.value)) {
+            //     dapVariable.value = 'Object';
+            //     v.reference ??= this._variableHandles.create(v);
+            //     dapVariable.variablesReference = v.reference;
+            // } else {
 
-                switch (typeof v.value) {
-                    case 'number':
-                        if (Math.round(v.value) === v.value) {
-                            dapVariable.value = this.formatNumber(v.value);
-                            (<any>dapVariable).__vscodeVariableMenuContext = 'simple';	// enable context menu contribution
-                            dapVariable.type = 'integer';
-                        } else {
-                            dapVariable.value = v.value.toString();
-                            dapVariable.type = 'float';
-                        }
-                        break;
-                    case 'string':
-                        dapVariable.value = `"${v.value}"`;
-                        break;
-                    case 'boolean':
-                        dapVariable.value = v.value ? 'true' : 'false';
-                        break;
-                    default:
-                        dapVariable.value = typeof v.value;
-                        break;
-                }
+            switch (typeof v.value) {
+                // case 'number':
+                //     if (Math.round(v.value) === v.value) {
+                //         dapVariable.value = this.formatNumber(v.value);
+                //         (<any>dapVariable).__vscodeVariableMenuContext = 'simple';	// enable context menu contribution
+                //         dapVariable.type = 'integer';
+                //     } else {
+                //         //dapVariable.value = v.value.toString();
+                //         dapVariable.type = 'float';
+                //     }
+                //     break;
+                // case 'string':
+                //     dapVariable.value = `"${v.value}"`;
+                //     break;
+                // case 'boolean':
+                //     dapVariable.value = v.value ? 'true' : 'false';
+                //     break;
+                case 'bigint':
+                    dapVariable.value = v.value.toString();
+                    dapVariable.type = 'integer';
+                    break;
+                default:
+                    dapVariable.value = typeof v.value;
+                    break;
+                // }
             }
         }
 

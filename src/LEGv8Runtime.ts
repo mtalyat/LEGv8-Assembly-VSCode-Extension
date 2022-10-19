@@ -51,40 +51,47 @@ interface RuntimeDisassembledInstruction {
     line?: number;
 }
 
-export type IRuntimeVariableType = number | bigint | boolean | string | RuntimeVariable[];
+export type IRuntimeVariableType = bigint;
 
 export class RuntimeVariable {
-    private _memory?: Uint8Array;
-
+    // idk
     public reference?: number;
 
     public get value() {
-        return this._value;
+        if (this._isRegister) {
+            return this._simulation.getReg(this._index);
+        } else {
+            return this._simulation.getMem(this._index, 1);
+        }
     }
 
     public set value(value: IRuntimeVariableType) {
-        this._value = value;
-        this._memory = undefined;
+        if (this._isRegister) {
+            this._simulation.setReg(this._index, value);
+        } else {
+            this._simulation.setMem(this._index, value, 1);
+        }
     }
 
     public get memory() {
-        if (this._memory === undefined && typeof this._value === 'string') {
-            this._memory = new TextEncoder().encode(this._value);
-        }
-        return this._memory;
+        // if (this._memory === undefined && typeof this._value === 'string') {
+        //     this._memory = new TextEncoder().encode(this._value);
+        // }
+        // return this._memory;
+        return new Uint8Array();
     }
 
-    constructor(public readonly name: string, private _value: IRuntimeVariableType) { }
+    constructor(public readonly name: string, private _isRegister: boolean, private _index: number, private _simulation: Simulation) { }
 
     public setMemory(data: Uint8Array, offset = 0) {
-        const memory = this.memory;
-        if (!memory) {
-            return;
-        }
+        // const memory = this.memory;
+        // if (!memory) {
+        //     return;
+        // }
 
-        memory.set(data, offset);
-        this._memory = memory;
-        this._value = new TextDecoder().decode(memory);
+        // memory.set(data, offset);
+        // this._memory = memory;
+        // this._value = new TextDecoder().decode(memory);
     }
 }
 
@@ -116,6 +123,9 @@ export function timeout(ms: number) {
 export class LEGv8Runtime extends EventEmitter {
 
     private _simulation: Simulation = new Simulation();
+    public get Simulation() {
+        return this._simulation;
+    }
 
     // the initial (and one and only) file we are 'debugging'
     private _sourceFile: string = '';
@@ -475,13 +485,13 @@ export class LEGv8Runtime extends EventEmitter {
 
         let a: RuntimeVariable[] = [];
 
-        for (let i = 0; i < 10; i++) {
-            a.push(new RuntimeVariable(`global_${i}`, i));
-            if (cancellationToken && cancellationToken()) {
-                break;
-            }
-            await timeout(1000);
-        }
+        // for (let i = 0; i < Simulation.memorySize; i++) {
+        //     a.push(new RuntimeVariable(`m${i}`, false, i, this._simulation));
+        //     if (cancellationToken && cancellationToken()) {
+        //         break;
+        //     }
+        //     await timeout(1000); // 10ms per byte of memory
+        // }
 
         return a;
     }
@@ -489,7 +499,7 @@ export class LEGv8Runtime extends EventEmitter {
     public getLocalVariables(): RuntimeVariable[] {
         // return Array.from(this.variables, ([name, value]) => value);
 
-        return Array.from(this._simulation.getRegisters(), (v: bigint, k: number) => new RuntimeVariable('X' + k, v.toString()));
+        return Array.from(this._simulation.getRegisters(), (v: bigint, k: number) => new RuntimeVariable('X' + k, true, k, this._simulation));
     }
 
     public getLocalVariable(name: string): RuntimeVariable | undefined {
@@ -501,7 +511,7 @@ export class LEGv8Runtime extends EventEmitter {
             return undefined;
         }
 
-        return new RuntimeVariable(name, this._simulation.getReg(reg).toString());
+        return new RuntimeVariable(name, true, reg, this._simulation);
     }
 
     /**
