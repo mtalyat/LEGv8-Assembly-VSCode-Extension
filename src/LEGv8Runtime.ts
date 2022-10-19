@@ -95,12 +95,6 @@ export class RuntimeVariable {
     }
 }
 
-interface Word {
-    name: string;
-    line: number;
-    index: number;
-}
-
 export function timeout(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -137,7 +131,6 @@ export class LEGv8Runtime extends EventEmitter {
 
     // the contents (= lines) of the one and only file
     private sourceLines: string[] = [];
-    private instructions: Word[] = [];
     private starts: number[] = [];
     private ends: number[] = [];
 
@@ -226,7 +219,7 @@ export class LEGv8Runtime extends EventEmitter {
         }
 
         while (!this.executeLine(this.currentLine, reverse)) {
-            if (this._returnStack[this._returnStack.length - 1] === this._simulation.executionIndex()) {
+            if (this._returnStack[this._returnStack.length - 1] === this._simulation.executionIndex) {
                 // found the index to stop at
                 this._returnStack.pop();
                 return;
@@ -243,14 +236,14 @@ export class LEGv8Runtime extends EventEmitter {
 
     private normalStep(reverse: boolean) {
         // if at the next position, remove it
-        if (this._returnStack.length > 0 && this._returnStack[this._returnStack.length - 1] == this._simulation.executionIndex()) {
+        if (this._returnStack.length > 0 && this._returnStack[this._returnStack.length - 1] == this._simulation.executionIndex) {
             this._returnStack.pop();
         }
 
         // add return if BL
         if (this._simulation.getInstruction(this._simulation.getIndexFromLineNumber(this.currentLine)) === InstructionMnemonic.BL) {
             // add a return index
-            this._returnStack.push(this._simulation.executionIndex() + 1);
+            this._returnStack.push(this._simulation.executionIndex + 1);
         }
 
         if (!this.executeLine(this.currentLine, reverse)) {
@@ -279,7 +272,7 @@ export class LEGv8Runtime extends EventEmitter {
                 // continue until we come back to the next line after this BL
 
                 // add a return index
-                this._returnStack.push(this._simulation.executionIndex() + 1);
+                this._returnStack.push(this._simulation.executionIndex + 1);
 
                 // continue until we hit it
                 this.continueUntilNextReturn(reverse);
@@ -346,23 +339,24 @@ export class LEGv8Runtime extends EventEmitter {
 
     public getStepInTargets(frameId: number): IRuntimeStepInTargets[] {
 
-        const line = this.getLine();
-        const words = this.getWords(this.currentLine, line);
+        // const line = this.getLine();
+        // const words = this.getWords(this.currentLine, line);
 
-        // return nothing if frameId is out of range
-        if (frameId < 0 || frameId >= words.length) {
-            return [];
-        }
+        // // return nothing if frameId is out of range
+        // if (frameId < 0 || frameId >= words.length) {
+        //     return [];
+        // }
 
-        const { name, index } = words[frameId];
+        // const { name, index } = words[frameId];
 
-        // make every character of the frame a potential "step in" target
-        return name.split('').map((c, ix) => {
-            return {
-                id: index + ix,
-                label: `target: ${c}`
-            };
-        });
+        // // make every character of the frame a potential "step in" target
+        // return name.split('').map((c, ix) => {
+        //     return {
+        //         id: index + ix,
+        //         label: `target: ${c}`
+        //     };
+        // });
+        return [];
     }
 
     /**
@@ -371,8 +365,8 @@ export class LEGv8Runtime extends EventEmitter {
     public stack(startFrame: number, endFrame: number): IRuntimeStack {
 
         const line = this.getLine();
-        const words = this.getWords(this.currentLine, line);
-        words.push({ name: 'BOTTOM', line: -1, index: -1 });	// add a sentinel so that the stack is never empty...
+        // const words = this.getWords(this.currentLine, line);
+        // words.push({ name: 'BOTTOM', line: -1, index: -1 });	// add a sentinel so that the stack is never empty...
 
         // if the line contains the word 'disassembly' we support to "disassemble" the line by adding an 'instruction' property to the stackframe
         const instruction = line.indexOf('disassembly') >= 0 ? this.instruction : undefined;
@@ -381,11 +375,11 @@ export class LEGv8Runtime extends EventEmitter {
 
         const frames: IRuntimeStackFrame[] = [];
         // every word of the current line becomes a stack frame.
-        for (let i = startFrame; i < Math.min(endFrame, words.length); i++) {
+        for (let i = startFrame; i < Math.min(endFrame, this._simulation.instructionCount); i++) {
 
             const stackFrame: IRuntimeStackFrame = {
                 index: i,
-                name: `${words[i].name}(${i})`,	// use a word of the line as the stackframe name
+                name: `${this._simulation.getInstruction(i)}(${i})`,
                 file: this._sourceFile,
                 line: this.currentLine,
                 column: undefined, // words[i].index
@@ -397,7 +391,7 @@ export class LEGv8Runtime extends EventEmitter {
 
         return {
             frames: frames,
-            count: words.length
+            count: this._simulation.instructionCount
         };
     }
 
@@ -406,7 +400,8 @@ export class LEGv8Runtime extends EventEmitter {
      * Here we return the start location of words with more than 8 characters.
      */
     public getBreakpoints(path: string, line: number): number[] {
-        return this.getWords(line, this.getLine(line)).filter(w => w.name.length > 8).map(w => w.index);
+        // return this.getWords(line, this.getLine(line)).filter(w => w.name.length > 8).map(w => w.index);
+        return [];
     }
 
     /*
@@ -522,11 +517,11 @@ export class LEGv8Runtime extends EventEmitter {
         const instructions: RuntimeDisassembledInstruction[] = [];
 
         for (let a = address; a < address + instructionCount; a++) {
-            if (a >= 0 && a < this.instructions.length) {
+            if (a >= 0 && a < this._simulation.instructionCount) {
                 instructions.push({
                     address: a,
-                    instruction: this.instructions[a].name,
-                    line: this.instructions[a].line
+                    instruction: this._simulation.getInstruction(a),
+                    line: this._simulation.getLineNumberFromIndex(a)
                 });
             } else {
                 instructions.push({
@@ -545,17 +540,6 @@ export class LEGv8Runtime extends EventEmitter {
         return this.sourceLines[line === undefined ? this.currentLine : line].trim();
     }
 
-    private getWords(l: number, line: string): Word[] {
-        // break line into words
-        const WORD_REGEXP = /[a-z]+/ig;
-        const words: Word[] = [];
-        let match: RegExpExecArray | null;
-        while (match = WORD_REGEXP.exec(line)) {
-            words.push({ name: match[0], line: l, index: match.index });
-        }
-        return words;
-    }
-
     private async loadSource(file: string): Promise<void> {
         if (this._sourceFile !== file) {
             // load from file
@@ -570,21 +554,6 @@ export class LEGv8Runtime extends EventEmitter {
         this._simulation = Parser.parseSimulation(sourceText);
 
         this.sourceLines = sourceText.split(/\r?\n/);
-
-        this.instructions = [];
-
-        this.starts = [];
-        this.instructions = [];
-        this.ends = [];
-
-        for (let l = 0; l < this.sourceLines.length; l++) {
-            this.starts.push(this.instructions.length);
-            const words = this.getWords(l, this.sourceLines[l]);
-            for (let word of words) {
-                this.instructions.push(word);
-            }
-            this.ends.push(this.instructions.length);
-        }
     }
 
     /**
@@ -640,14 +609,10 @@ export class LEGv8Runtime extends EventEmitter {
      * Returns true if execution sent out a stopped event and needs to stop.
      */
     private executeLine(ln: number, reverse: boolean): boolean {
-
-        // first "execute" the instructions associated with this line and potentially hit instruction breakpoints
-        while (reverse ? this.instruction >= this.starts[ln] : this.instruction < this.ends[ln]) {
-            reverse ? this.instruction-- : this.instruction++;
-            if (this.instructionBreakpoints.has(this.instruction)) {
-                this.sendEvent('stopOnInstructionBreakpoint');
-                return true;
-            }
+        // if this instruction has a breakpoint, stop
+        if (this.instructionBreakpoints.has(this.instruction)) {
+            this.sendEvent('stopOnInstructionBreakpoint');
+            return true;
         }
 
         // execute the line at the given index

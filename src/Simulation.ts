@@ -60,6 +60,12 @@ export class Simulation {
      * The array of Instructions within this Simulation.
      */
     private _instructions: Instruction[];
+    public get instructions() {
+        return this._instructions;
+    }
+    public get instructionCount() {
+        return this._instructions.length;
+    }
 
     private _lines: number[];
 
@@ -72,6 +78,13 @@ export class Simulation {
      * The current execution index of the Simulation.
      */
     private _executionIndex: number;
+    public get executionIndex() {
+        return this._executionIndex;
+    }
+
+    public set executionIndex(index: number) {
+        this._executionIndex = index;
+    }
 
     /**
      * A UInt8 array that represents the memory.
@@ -178,6 +191,10 @@ export class Simulation {
 
     public getIndexFromLineNumber(lineNumber: number): number {
         return this._lines[lineNumber];
+    }
+
+    public getLineNumberFromIndex(index: number): number {
+        return this._instructions[index].LineNumber;
     }
 
     //#endregion
@@ -467,10 +484,6 @@ export class Simulation {
     // gets the time spent on executing the program in milliseconds
     public executionTime(): number {
         return this._stopwatch.elapsed();
-    }
-
-    public executionIndex(): number {
-        return this._executionIndex;
     }
 
     public executionLineNumber(): number {
