@@ -19,7 +19,7 @@ export class BInstruction extends Instruction {
                 sim.branch(this.getBrAddress());
                 break;
             case InstructionMnemonic.BL:
-                sim.setRegAsNumber(Simulation.lrRegister, sim.index());
+                sim.setRegAsNumber(Simulation.lrRegister, sim.executionIndex());
                 sim.branch(this.getBrAddress());
                 break;
             default:

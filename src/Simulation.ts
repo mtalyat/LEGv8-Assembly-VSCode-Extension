@@ -1,6 +1,8 @@
 // import { exec } from "child_process";
 // import { off } from "process";
 import { Instruction } from "./Instruction";
+import { InstructionMnemonic } from "./InstructionMnemonic";
+import { Line } from "./Line";
 import { Output } from "./Output";
 import { PackedBigInt } from "./PackedBigInt";
 import { PackedNumber } from "./PackedNumber";
@@ -52,11 +54,14 @@ export class Simulation {
      * Is this Simulation running?
      */
     private _isRunning: boolean;
+    public get IsRunning(): boolean { return this._isRunning; }
 
     /**
      * The array of Instructions within this Simulation.
      */
     private _instructions: Instruction[];
+
+    private _lines: number[];
 
     /**
      * A list of Instruction indices that logs the stack trace of the program.
@@ -85,12 +90,18 @@ export class Simulation {
      * Creates a new Simulation that will run on the given Instruction array.
      * @param instructions the instructions that this Simulation will run.
      */
-    public constructor(instructions: Instruction[]) {
+    public constructor(fileText?: string) {
         this._stopwatch = new Stopwatch();
 
         this._isRunning = false;
 
-        this._instructions = instructions;
+        this._lines = new Array();
+
+        if (fileText !== undefined) {
+            this._instructions = this.getInstructionsFromText(fileText);
+        } else {
+            this._instructions = new Array();
+        }
 
         this._stackTrace = new Array();
 
@@ -102,6 +113,74 @@ export class Simulation {
 
         this.reset();
     }
+
+    //#region Helper
+
+    private getInstructionsFromText(fileText: string): Instruction[] {
+        // split by lines
+        let textLines = fileText.split("\n");
+
+        // turn each line into a Line
+        let line: Line;
+        let textLine: string;
+
+        let instructionLines: Line[] = new Array();
+
+        for (let i = 0; i < textLines.length; i++) {
+            textLine = textLines[i];
+
+            if (!textLine) {
+                // text line is invalid
+                this._lines[i] = -1;
+                continue;
+            }
+
+            line = Parser.parseLine(textLine, i);
+
+            if (line !== undefined && !line.isEmpty()) {
+                // check for label
+                if (line.getLabel().endsWith(Parser.identifierLabelPostfix)) {
+                    // must be a label
+                    this._lines[i] = -1;
+                    Parser.setLabel(line.getLabel().substring(0, line.getLabel().length - 1), instructionLines.length);
+                } else {
+                    // must be an instruction
+                    this._lines[i] = instructionLines.length;
+                    instructionLines.push(line);
+                }
+            } else {
+                // line is empty or undefined
+                this._lines[i] = -1;
+            }
+        }
+
+        // compile instructions
+        let instructions: Instruction[] = new Array();
+        let instruction: Instruction | null;
+
+        for (let i = 0; i < instructionLines.length; i++) {
+            line = instructionLines[i];
+
+            if (line === undefined) {
+                continue;
+            }
+
+            // must be an instruction of some sort
+            instruction = Parser.parseInstruction(i, line);
+
+            if (instruction !== undefined && instruction !== null) {
+                instructions.push(instruction);
+            }
+        }
+
+        return instructions;
+    }
+
+    public getIndexFromLineNumber(lineNumber: number): number {
+        return this._lines[lineNumber];
+    }
+
+    //#endregion
 
     //#region Data
 
@@ -139,6 +218,10 @@ export class Simulation {
         }
     }
 
+    public getRegisters(): BigInt64Array {
+        return this._registers;
+    }
+
     //#endregion
 
     //#region Memory
@@ -166,6 +249,10 @@ export class Simulation {
         for (let i = 0; i < size; i++) {
             this._memory[index + i] = packed.getByte(BigInt(i), 1n);
         }
+    }
+
+    public getMemory(): Uint8Array {
+        return this._memory;
     }
 
     //#endregion
@@ -247,6 +334,9 @@ export class Simulation {
         this._executionIndex = 0;
         this._stackTrace = new Array();
 
+        // clear output
+        Output.clear();
+
         this._stopwatch.reset();
     }
 
@@ -257,8 +347,6 @@ export class Simulation {
         }
 
         this._isRunning = true;
-
-        this.reset();
 
         this._stopwatch.start();
     }
@@ -271,27 +359,64 @@ export class Simulation {
 
         // if can execute, then do so
         if (this._executionIndex >= 0 && this._executionIndex < this._instructions.length) {
-            // get the instruction
-            let instruction = this._instructions[this._executionIndex];
 
-            // debug
-            // console.log(instruction.toString());
+            // execute the next line, continue if able
+            if (this.execute(this._executionIndex)) {
 
-            // increment instruction index
-            this._executionIndex++;
+                // good execution, continue
+                return true;
+            }
+        }
 
-            // add to stack trace
-            this._stackTrace.push(this._executionIndex);
+        // finished, or faulted
+        this.stop();
 
-            // execute it
+        return false;
+    }
+
+    public execute(index: number): boolean {
+        // move to the given index
+        this._executionIndex = index;
+
+        // get the instruction
+        let instruction = this._instructions[this._executionIndex];
+
+        // debug
+        // console.log(instruction.toString());
+
+        // add to stack trace
+        this._stackTrace.push(this._executionIndex);
+
+        // move on
+        // instruction will set branch if we are to go to a different instruction
+        this._executionIndex++;
+
+        // execute it
+        if (instruction !== undefined) {
             instruction.execute(this);
 
+            // executed successfully
             return true;
         } else {
-            // finished
-            this.stop();
+            // did not execute, but we ignore that
+            return true;
+        }
+    }
 
+    public executeLine(lineNumber: number): boolean {
+        //find next valid execution index
+        let index = this.getIndexFromLineNumber(lineNumber);
+
+        while (index === -1 && lineNumber < this._lines.length) {
+            index = this.getIndexFromLineNumber(++lineNumber);
+        }
+
+        // if at the end of the document, do nothing
+        if (lineNumber >= this._lines.length) {
             return false;
+        } else {
+            // valid line
+            return this.execute(index);
         }
     }
 
@@ -310,6 +435,12 @@ export class Simulation {
         this._isRunning = false;
     }
 
+    public quit(): void {
+        this.stop();
+
+        this._executionIndex = -1;
+    }
+
     /**
      * Runs the program asynchronously.
      * @returns 
@@ -318,10 +449,6 @@ export class Simulation {
         await new Promise(async (resolve, reject) => {
             // start the simulation
             this.start();
-
-            // setTimeout(() => {
-            //     reject("Program timed out.");
-            // }, 10);
 
             // step through it
             while (this.step()) { }
@@ -337,18 +464,36 @@ export class Simulation {
         this._executionIndex = index;
     }
 
-    public index(): number {
-        return this._executionIndex;
-    }
-
     // gets the time spent on executing the program in milliseconds
     public executionTime(): number {
         return this._stopwatch.elapsed();
     }
 
+    public executionIndex(): number {
+        return this._executionIndex;
+    }
+
+    public executionLineNumber(): number {
+        let i = this._instructions[this._executionIndex];
+
+        if (i !== undefined) {
+            return i.LineNumber;
+        }
+
+        return -1;
+    }
+
+    public getExecutionInstruction(): InstructionMnemonic {
+        return this.getInstruction(this._executionIndex);
+    }
+
+    public getInstruction(index: number): InstructionMnemonic {
+        return this._instructions[index].Mnemonic;
+    }
+
     //#endregion
 
-    //#region  Debugging
+    //#region Debugging
 
     public dump(): void {
         // print all registers
@@ -356,7 +501,7 @@ export class Simulation {
         this.printData();
 
         // quit program
-        this.stop();
+        this.quit();
     }
 
     public halt(): void {
@@ -364,8 +509,8 @@ export class Simulation {
         // print all memory
         this.printData();
 
-        // TODO: do not stop, just pause
-        this.stop();
+        // quit program
+        this.quit();
     }
 
     private printData(): void {

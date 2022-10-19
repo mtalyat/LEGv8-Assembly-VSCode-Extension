@@ -12,17 +12,25 @@ export class Instruction {
     /**
      * The size of an Instruction in bits.
      */
-    public static readonly sizeInBits: number = 32;
+    public static readonly SIZE_IN_BITS: number = 32;
 
     /**
      * The InstructionMnemonic (name) associated with this Instruction.
      */
     protected readonly _mnemonic: InstructionMnemonic;
+    public get Mnemonic(): InstructionMnemonic {
+        return this._mnemonic;
+    }
 
     /**
      * The machine code that this instruction contains.
      */
     protected readonly _code: PackedNumber;
+
+    private readonly _lineNumber: number;
+    public get LineNumber(): number {
+        return this._lineNumber;
+    }
 
     /**
      * Creates a new Instruction using the given Core Instruction template data, as well as the given Line from the assembly file.
@@ -36,6 +44,8 @@ export class Instruction {
         // get the argument values
         // pack into data
         this._code = new PackedNumber(0);
+
+        this._lineNumber = line.getLineNumber();
 
         // get the argument values
         if (line.getArgs().length !== 0) {

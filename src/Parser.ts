@@ -26,6 +26,10 @@ export class Parser {
 
     private static _labels: Map<string, number> = new Map();
 
+    public static setLabel(name: string, value: number) {
+        this._labels.set(name, value);
+    }
+
     public static loadCoreInstructions(localPath: string): void {
         const filePath = path.join(__dirname, localPath);
 
@@ -116,56 +120,7 @@ export class Parser {
 
     // parses an entire simulation from the given text
     public static parseSimulation(text: string): Simulation {
-        // split by lines
-        let textLines = text.split("\n");
-
-        // turn each line into a Line
-        let line: Line;
-        let textLine: string;
-
-        let instructionLines: Line[] = new Array();
-
-        for (let i = 0; i < textLines.length; i++) {
-            textLine = textLines[i];
-
-            if (!textLine) {
-                continue;
-            }
-
-            line = this.parseLine(textLine, i + 1);
-
-            if (line !== undefined && !line.isEmpty()) {
-                // check for label
-                if (line.getLabel().endsWith(this.identifierLabelPostfix)) {
-                    // must be a label
-                    this._labels.set(line.getLabel().substring(0, line.getLabel().length - 1), instructionLines.length);
-                } else {
-                    // must be an instruction
-                    instructionLines.push(line);
-                }
-            }
-        }
-
-        // compile instructions
-        let instructions: Instruction[] = new Array();
-        let instruction: Instruction | null;
-
-        for (let i = 0; i < instructionLines.length; i++) {
-            line = instructionLines[i];
-
-            if (line === undefined) {
-                continue;
-            }
-
-            // must be an instruction of some sort
-            instruction = this.parseInstruction(i, line);
-
-            if (instruction !== undefined && instruction !== null) {
-                instructions.push(instruction);
-            }
-        }
-
-        return new Simulation(instructions);
+        return new Simulation(text);
     }
 
     public static parseRegister(text: string): number | undefined {

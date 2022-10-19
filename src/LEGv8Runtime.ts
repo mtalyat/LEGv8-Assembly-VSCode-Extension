@@ -2,6 +2,13 @@ import { readFileSync } from 'fs';
 import { EventEmitter } from 'events';
 import { DebugProtocol } from '@vscode/debugprotocol';
 import { TextEncoder, TextDecoder } from 'util';
+import { Line } from './Line';
+import { Parser } from './Parser';
+import { Instruction } from './Instruction';
+import { resolve } from 'path';
+import { Simulation } from './Simulation';
+import { Output } from './Output';
+import { InstructionMnemonic } from './InstructionMnemonic';
 
 const Net = require("net");
 const Path = require('path');
@@ -44,7 +51,7 @@ interface RuntimeDisassembledInstruction {
     line?: number;
 }
 
-export type IRuntimeVariableType = number | boolean | string | RuntimeVariable[];
+export type IRuntimeVariableType = number | bigint | boolean | string | RuntimeVariable[];
 
 export class RuntimeVariable {
     private _memory?: Uint8Array;
@@ -108,6 +115,8 @@ export function timeout(ms: number) {
  */
 export class LEGv8Runtime extends EventEmitter {
 
+    private _simulation: Simulation = new Simulation();
+
     // the initial (and one and only) file we are 'debugging'
     private _sourceFile: string = '';
     public get sourceFile() {
@@ -131,7 +140,6 @@ export class LEGv8Runtime extends EventEmitter {
         this._currentLine = x;
         this.instruction = this.starts[x];
     }
-    private currentColumn: number | undefined;
 
     // This is the next instruction that will be 'executed'
     public instruction = 0;
@@ -151,6 +159,8 @@ export class LEGv8Runtime extends EventEmitter {
     private namedException: string | undefined;
     private otherExceptions = false;
 
+    private _returnStack: number[] = new Array();
+
     constructor(private fileAccessor: FileAccessor) {
         super();
     }
@@ -161,6 +171,12 @@ export class LEGv8Runtime extends EventEmitter {
     public async start(program: string, stopOnEntry: boolean, debug: boolean): Promise<void> {
 
         await this.loadSource(this.normalizePathAndCasing(program));
+
+        // start the simulation
+        this._simulation.start();
+
+        // show the output window
+        Output.show();
 
         if (debug) {
             await this.verifyBreakpoints(this._sourceFile);
@@ -174,13 +190,15 @@ export class LEGv8Runtime extends EventEmitter {
         } else {
             this.continue(false);
         }
+
+        // stop the simulation
+        this._simulation.stop();
     }
 
     /**
      * Continue execution to the end/beginning.
      */
     public continue(reverse: boolean) {
-
         while (!this.executeLine(this.currentLine, reverse)) {
             if (this.updateCurrentLine(reverse)) {
                 break;
@@ -191,11 +209,52 @@ export class LEGv8Runtime extends EventEmitter {
         }
     }
 
+    private continueUntilNextReturn(reverse: boolean) {
+        if (this._returnStack.length === 0) {
+            this.continue(reverse);
+            return;
+        }
+
+        while (!this.executeLine(this.currentLine, reverse)) {
+            if (this._returnStack[this._returnStack.length - 1] === this._simulation.executionIndex()) {
+                // found the index to stop at
+                this._returnStack.pop();
+                return;
+            }
+
+            if (this.updateCurrentLine(reverse)) {
+                break;
+            }
+            if (this.findNextStatement(reverse)) {
+                break;
+            }
+        }
+    }
+
+    private normalStep(reverse: boolean) {
+        // if at the next position, remove it
+        if (this._returnStack.length > 0 && this._returnStack[this._returnStack.length - 1] == this._simulation.executionIndex()) {
+            this._returnStack.pop();
+        }
+
+        // add return if BL
+        if (this._simulation.getInstruction(this._simulation.getIndexFromLineNumber(this.currentLine)) === InstructionMnemonic.BL) {
+            // add a return index
+            this._returnStack.push(this._simulation.executionIndex() + 1);
+        }
+
+        if (!this.executeLine(this.currentLine, reverse)) {
+            if (!this.updateCurrentLine(reverse)) {
+                this.findNextStatement(reverse, 'stopOnStep');
+            }
+        }
+    }
+
     /**
      * Step to the next/previous non empty line.
      */
     public step(instruction: boolean, reverse: boolean) {
-
+        console.log("step");
         if (instruction) {
             if (reverse) {
                 this.instruction--;
@@ -204,35 +263,56 @@ export class LEGv8Runtime extends EventEmitter {
             }
             this.sendEvent('stopOnStep');
         } else {
-            if (!this.executeLine(this.currentLine, reverse)) {
-                if (!this.updateCurrentLine(reverse)) {
-                    this.findNextStatement(reverse, 'stopOnStep');
-                }
+            // step over
+            // if a BL, continue until we come back to the next line after this BL
+            if (this._simulation.getInstruction(this._simulation.getIndexFromLineNumber(this.currentLine)) === InstructionMnemonic.BL) {
+                // continue until we come back to the next line after this BL
+
+                // add a return index
+                this._returnStack.push(this._simulation.executionIndex() + 1);
+
+                // continue until we hit it
+                this.continueUntilNextReturn(reverse);
+
+                this.sendEvent('stopOnStep');
+            } else {
+                // otherwise act as normal
+                this.normalStep(reverse);
             }
         }
     }
 
     private updateCurrentLine(reverse: boolean): boolean {
-        if (reverse) {
-            if (this.currentLine > 0) {
-                this.currentLine--;
-            } else {
-                // no more lines: stop at first line
-                this.currentLine = 0;
-                this.currentColumn = undefined;
-                this.sendEvent('stopOnEntry');
-                return true;
-            }
-        } else {
-            if (this.currentLine < this.sourceLines.length - 1) {
-                this.currentLine++;
-            } else {
-                // no more lines: run to end
-                this.currentColumn = undefined;
-                this.sendEvent('end');
-                return true;
-            }
+        // if (reverse) {
+        //     if (this.currentLine > 0) {
+        //         this.currentLine--;
+        //     } else {
+        //         // no more lines: stop at first line
+        //         this.currentLine = 0;
+        //         this.currentColumn = undefined;
+        //         this.sendEvent('stopOnEntry');
+        //         return true;
+        //     }
+        // } else {
+        //     if (this.currentLine < this.sourceLines.length - 1) {
+        //         this.currentLine++;
+        //     } else {
+        //         // no more lines: run to end
+        //         this.currentColumn = undefined;
+        //         this.sendEvent('end');
+        //         return true;
+        //     }
+        // }
+        // return false;
+        this.currentLine = this._simulation.executionLineNumber();
+
+        if (this.currentLine < 0 || this.currentLine >= this.sourceLines.length) {
+            // no more lines: run to end
+            this.sendEvent('end');
+            return true;
         }
+
+        // keep going, valid line
         return false;
     }
 
@@ -240,31 +320,17 @@ export class LEGv8Runtime extends EventEmitter {
      * "Step into" for Mock debug means: go to next character
      */
     public stepIn(targetId: number | undefined) {
-        if (typeof targetId === 'number') {
-            this.currentColumn = targetId;
-            this.sendEvent('stopOnStep');
-        } else {
-            if (typeof this.currentColumn === 'number') {
-                if (this.currentColumn <= this.sourceLines[this.currentLine].length) {
-                    this.currentColumn += 1;
-                }
-            } else {
-                this.currentColumn = 1;
-            }
-            this.sendEvent('stopOnStep');
-        }
+        this.normalStep(false);
+        console.log("step in");
+        // this.sendEvent('stopOnStep');
     }
 
     /**
      * "Step out" for Mock debug means: go to previous character
      */
     public stepOut() {
-        if (typeof this.currentColumn === 'number') {
-            this.currentColumn -= 1;
-            if (this.currentColumn === 0) {
-                this.currentColumn = undefined;
-            }
-        }
+        this.continueUntilNextReturn(false);
+        console.log("step out");
         this.sendEvent('stopOnStep');
     }
 
@@ -301,7 +367,7 @@ export class LEGv8Runtime extends EventEmitter {
         // if the line contains the word 'disassembly' we support to "disassemble" the line by adding an 'instruction' property to the stackframe
         const instruction = line.indexOf('disassembly') >= 0 ? this.instruction : undefined;
 
-        const column = typeof this.currentColumn === 'number' ? this.currentColumn : undefined;
+        //const column = typeof this.currentColumn === 'number' ? this.currentColumn : undefined;
 
         const frames: IRuntimeStackFrame[] = [];
         // every word of the current line becomes a stack frame.
@@ -312,7 +378,7 @@ export class LEGv8Runtime extends EventEmitter {
                 name: `${words[i].name}(${i})`,	// use a word of the line as the stackframe name
                 file: this._sourceFile,
                 line: this.currentLine,
-                column: column, // words[i].index
+                column: undefined, // words[i].index
                 instruction: instruction
             };
 
@@ -421,11 +487,21 @@ export class LEGv8Runtime extends EventEmitter {
     }
 
     public getLocalVariables(): RuntimeVariable[] {
-        return Array.from(this.variables, ([name, value]) => value);
+        // return Array.from(this.variables, ([name, value]) => value);
+
+        return Array.from(this._simulation.getRegisters(), (v: bigint, k: number) => new RuntimeVariable('X' + k, v.toString()));
     }
 
     public getLocalVariable(name: string): RuntimeVariable | undefined {
-        return this.variables.get(name);
+        // return this.variables.get(name);
+
+        let reg = Parser.parseRegister(name);
+
+        if (reg === undefined) {
+            return undefined;
+        }
+
+        return new RuntimeVariable(name, this._simulation.getReg(reg).toString());
     }
 
     /**
@@ -472,13 +548,18 @@ export class LEGv8Runtime extends EventEmitter {
 
     private async loadSource(file: string): Promise<void> {
         if (this._sourceFile !== file) {
+            // load from file
             this._sourceFile = this.normalizePathAndCasing(file);
             this.initializeContents(await this.fileAccessor.readFile(file));
         }
     }
 
     private initializeContents(memory: Uint8Array) {
-        this.sourceLines = new TextDecoder().decode(memory).split(/\r?\n/);
+        let sourceText: string = new TextDecoder().decode(memory);
+
+        this._simulation = Parser.parseSimulation(sourceText);
+
+        this.sourceLines = sourceText.split(/\r?\n/);
 
         this.instructions = [];
 
@@ -524,8 +605,15 @@ export class LEGv8Runtime extends EventEmitter {
                 }
             }
 
-            const line = this.getLine(ln);
-            if (line.length > 0) {
+            // const line = this.getLine(ln);
+            // if (line.length > 0) {
+            //     this.currentLine = ln;
+            //     break;
+            // }
+
+            let index = this._simulation.getIndexFromLineNumber(ln);
+            if (index >= 0) {
+                // has an instruction
                 this.currentLine = ln;
                 break;
             }
@@ -552,94 +640,105 @@ export class LEGv8Runtime extends EventEmitter {
             }
         }
 
-        const line = this.getLine(ln);
+        // execute the line at the given index
+        if (this._simulation.execute(this._simulation.getIndexFromLineNumber(ln))) {
+            // line successfully executed
 
-        // find variable accesses
-        let reg0 = /\$([a-z][a-z0-9]*)(=(false|true|[0-9]+(\.[0-9]+)?|\".*\"|\{.*\}))?/ig;
-        let matches0: RegExpExecArray | null;
-        while (matches0 = reg0.exec(line)) {
-            if (matches0.length === 5) {
+            // update line number
+            this.currentLine = this._simulation.executionLineNumber();
 
-                let access: string | undefined;
-
-                const name = matches0[1];
-                const value = matches0[3];
-
-                let v = new RuntimeVariable(name, value);
-
-                if (value && value.length > 0) {
-
-                    if (value === 'true') {
-                        v.value = true;
-                    } else if (value === 'false') {
-                        v.value = false;
-                    } else if (value[0] === '"') {
-                        v.value = value.slice(1, -1);
-                    } else if (value[0] === '{') {
-                        v.value = [
-                            new RuntimeVariable('fBool', true),
-                            new RuntimeVariable('fInteger', 123),
-                            new RuntimeVariable('fString', 'hello'),
-                            new RuntimeVariable('flazyInteger', 321)
-                        ];
-                    } else {
-                        v.value = parseFloat(value);
-                    }
-
-                    if (this.variables.has(name)) {
-                        // the first write access to a variable is the "declaration" and not a "write access"
-                        access = 'write';
-                    }
-                    this.variables.set(name, v);
-                } else {
-                    if (this.variables.has(name)) {
-                        // variable must exist in order to trigger a read access
-                        access = 'read';
-                    }
-                }
-
-                const accessType = this.breakAddresses.get(name);
-                if (access && accessType && accessType.indexOf(access) >= 0) {
-                    this.sendEvent('stopOnDataBreakpoint', access);
-                    return true;
-                }
-            }
+            // no problems
+            return false;
         }
 
-        // if 'log(...)' found in source -> send argument to debug console
-        const reg1 = /(log|prio|out|err)\(([^\)]*)\)/g;
-        let matches1: RegExpExecArray | null;
-        while (matches1 = reg1.exec(line)) {
-            if (matches1.length === 3) {
-                this.sendEvent('output', matches1[1], matches1[2], this._sourceFile, ln, matches1.index);
-            }
-        }
+        // line unsuccessfully executed
+        return true;
 
-        // if pattern 'exception(...)' found in source -> throw named exception
-        const matches2 = /exception\((.*)\)/.exec(line);
-        if (matches2 && matches2.length === 2) {
-            const exception = matches2[1].trim();
-            if (this.namedException === exception) {
-                this.sendEvent('stopOnException', exception);
-                return true;
-            } else {
-                if (this.otherExceptions) {
-                    this.sendEvent('stopOnException', undefined);
-                    return true;
-                }
-            }
-        } else {
-            // if word 'exception' found in source -> throw exception
-            if (line.indexOf('exception') >= 0) {
-                if (this.otherExceptions) {
-                    this.sendEvent('stopOnException', undefined);
-                    return true;
-                }
-            }
-        }
+        // const line = this.getLine(ln);
 
-        // nothing interesting found -> continue
-        return false;
+        // // find variable accesses
+        // let reg0 = /\$([a-z][a-z0-9]*)(=(false|true|[0-9]+(\.[0-9]+)?|\".*\"|\{.*\}))?/ig;
+        // let matches0: RegExpExecArray | null;
+        // while (matches0 = reg0.exec(line)) {
+        //     if (matches0.length === 5) {
+
+        //         let access: string | undefined;
+
+        //         const name = matches0[1];
+        //         const value = matches0[3];
+
+        //         let v = new RuntimeVariable(name, value);
+
+        //         if (value && value.length > 0) {
+
+        //             if (value === 'true') {
+        //                 v.value = true;
+        //             } else if (value === 'false') {
+        //                 v.value = false;
+        //             } else if (value[0] === '"') {
+        //                 v.value = value.slice(1, -1);
+        //             } else if (value[0] === '{') {
+        //                 v.value = [
+        //                     new RuntimeVariable('fBool', true),
+        //                     new RuntimeVariable('fInteger', 123),
+        //                     new RuntimeVariable('fString', 'hello'),
+        //                     new RuntimeVariable('flazyInteger', 321)
+        //                 ];
+        //             } else {
+        //                 v.value = parseFloat(value);
+        //             }
+
+        //             if (this.variables.has(name)) {
+        //                 // the first write access to a variable is the "declaration" and not a "write access"
+        //                 access = 'write';
+        //             }
+        //             this.variables.set(name, v);
+        //         } else {
+        //             if (this.variables.has(name)) {
+        //                 // variable must exist in order to trigger a read access
+        //                 access = 'read';
+        //             }
+        //         }
+
+        //         const accessType = this.breakAddresses.get(name);
+        //         if (access && accessType && accessType.indexOf(access) >= 0) {
+        //             this.sendEvent('stopOnDataBreakpoint', access);
+        //             return true;
+        //         }
+        //     }
+        // }
+
+        // // if 'log(...)' found in source -> send argument to debug console
+        // const reg1 = /(log|prio|out|err)\(([^\)]*)\)/g;
+        // let matches1: RegExpExecArray | null;
+        // while (matches1 = reg1.exec(line)) {
+        //     if (matches1.length === 3) {
+        //         this.sendEvent('output', matches1[1], matches1[2], this._sourceFile, ln, matches1.index);
+        //     }
+        // }
+
+        // // if pattern 'exception(...)' found in source -> throw named exception
+        // const matches2 = /exception\((.*)\)/.exec(line);
+        // if (matches2 && matches2.length === 2) {
+        //     const exception = matches2[1].trim();
+        //     if (this.namedException === exception) {
+        //         this.sendEvent('stopOnException', exception);
+        //         return true;
+        //     } else {
+        //         if (this.otherExceptions) {
+        //             this.sendEvent('stopOnException', undefined);
+        //             return true;
+        //         }
+        //     }
+        // } else {
+        //     // if word 'exception' found in source -> throw exception
+        //     if (line.indexOf('exception') >= 0) {
+        //         if (this.otherExceptions) {
+        //             this.sendEvent('stopOnException', undefined);
+        //             return true;
+        //         }
+        //     }
+        // }
     }
 
     private async verifyBreakpoints(path: string): Promise<void> {

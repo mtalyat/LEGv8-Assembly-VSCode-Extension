@@ -16,7 +16,7 @@ export class Output {
      */
     public static getOutputChannel(): vscode.OutputChannel {
         if (this._outputChannel === null) {
-            this._outputChannel = vscode.window.createOutputChannel("LEGv8 Day");
+            this._outputChannel = vscode.window.createOutputChannel("LEGv8 Assembly Output");
             console.log("Created Output.");
         }
 
@@ -45,6 +45,7 @@ export class Output {
      * @param text the text to be printed to the Output window.
      */
     public static write(text: string): void {
+        // append text
         this.getOutputChannel().append(text);
     }
 
@@ -53,6 +54,7 @@ export class Output {
      * @param text the text to be printed to the Output window.
      */
     public static writeLine(text: string): void {
+        // append line
         this.getOutputChannel().appendLine(text);
     }
 
