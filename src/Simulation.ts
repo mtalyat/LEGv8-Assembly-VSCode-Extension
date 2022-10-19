@@ -497,11 +497,15 @@ export class Simulation {
     }
 
     public getExecutionInstruction(): InstructionMnemonic {
-        return this.getInstruction(this._executionIndex);
+        return this.getInstructionMnemonic(this._executionIndex);
     }
 
-    public getInstruction(index: number): InstructionMnemonic {
+    public getInstructionMnemonic(index: number): InstructionMnemonic {
         return this._instructions[index].Mnemonic;
+    }
+
+    public getInstruction(index: number): Instruction {
+        return this._instructions[index];
     }
 
     //#endregion

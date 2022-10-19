@@ -241,7 +241,7 @@ export class LEGv8Runtime extends EventEmitter {
         }
 
         // add return if BL
-        if (this._simulation.getInstruction(this._simulation.getIndexFromLineNumber(this.currentLine)) === InstructionMnemonic.BL) {
+        if (this._simulation.getInstructionMnemonic(this._simulation.getIndexFromLineNumber(this.currentLine)) === InstructionMnemonic.BL) {
             // add a return index
             this._returnStack.push(this._simulation.executionIndex + 1);
         }
@@ -268,7 +268,7 @@ export class LEGv8Runtime extends EventEmitter {
         } else {
             // step over
             // if a BL, continue until we come back to the next line after this BL
-            if (this._simulation.getInstruction(this._simulation.getIndexFromLineNumber(this.currentLine)) === InstructionMnemonic.BL) {
+            if (this._simulation.getInstructionMnemonic(this._simulation.getIndexFromLineNumber(this.currentLine)) === InstructionMnemonic.BL) {
                 // continue until we come back to the next line after this BL
 
                 // add a return index
@@ -379,10 +379,10 @@ export class LEGv8Runtime extends EventEmitter {
 
             const stackFrame: IRuntimeStackFrame = {
                 index: i,
-                name: `${this._simulation.getInstruction(i)}(${i})`,
+                name: `${i}: ${this._simulation.getInstruction(i)}`,
                 file: this._sourceFile,
                 line: this.currentLine,
-                column: undefined, // words[i].index
+                column: undefined,
                 instruction: instruction
             };
 
@@ -520,7 +520,7 @@ export class LEGv8Runtime extends EventEmitter {
             if (a >= 0 && a < this._simulation.instructionCount) {
                 instructions.push({
                     address: a,
-                    instruction: this._simulation.getInstruction(a),
+                    instruction: this._simulation.getInstructionMnemonic(a),
                     line: this._simulation.getLineNumberFromIndex(a)
                 });
             } else {
