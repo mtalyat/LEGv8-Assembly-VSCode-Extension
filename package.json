@@ -7,20 +7,29 @@
     "vscode": "^1.72.0"
   },
   "publisher": "mtalyat",
+  "license": "MIT",
   "dependencies": {
     "vscode-languageclient": "^7.0.0",
-    "await-notify": "1.0.1",
-    "vscode-debugadapter": "1.33.0"
+    "await-notify": "1.0.1"
   },
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Debuggers"
+  ],
+  "keywords": [
+    "LEGv8",
+    "Assembly"
   ],
   "repository": {
     "url": "https://github.com/mtalyat/LEGv8-Assembly-VSCode-Extension",
     "type": "git"
   },
+  "bugs": {
+    "url": "https://github.com/mtalyat/LEGv8-Assembly-VSCode-Extension/issues"
+  },
   "activationEvents": [
     "onCommand:legv8-assembly.runLegV8",
+    "onCommand:legv8-assembly.replLegV8",
     "onLanguage:LEGv8",
     "onDebug"
   ],
@@ -30,6 +39,42 @@
       {
         "command": "legv8-assembly.runLegV8",
         "title": "LEGv8: Run LEGv8 Assembly Code"
+      },
+      {
+        "command": "legv8-assembly.replLegV8",
+        "title": "LEGv8: REPL LEGv8 Assembly Code"
+      },
+      {
+        "command": "extension.legv8-assembly.debugEditorContents",
+        "title": "Debug File",
+        "category": "LEGv8 Debug",
+        "enablement": "!inDebugMode",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "extension.legv8-assembly.runEditorContents",
+        "title": "Run File",
+        "category": "LEGv8 Debug",
+        "enablement": "!inDebugMode",
+        "icon": "$(play)"
+      },
+      {
+        "command": "extension.legv8-assembly.toggleFormatting",
+        "title": "Toggle between decimal and hex formatting"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "legv8-assembly.runLegV8",
+        "key": "ctrl+r",
+        "mac": "cmd+r",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "legv8-assembly.replLegV8",
+        "key": "ctrl+9",
+        "mac": "cmd+9",
+        "when": "editorTextFocus"
       }
     ],
     "languages": [
@@ -49,6 +94,36 @@
         "configuration": "./language-configuration.json"
       }
     ],
+    "menus": {
+      "editor/title/run": [
+        {
+          "command": "extension.legv8-assembly.runEditorContents",
+          "when": "resourceLangId == LEGv8",
+          "group": "navigation@1"
+        },
+        {
+          "command": "extension.legv8-assembly.debugEditorContents",
+          "when": "resourceLangId == LEGv8",
+          "group": "navigation@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "extension.legv8-assembly.debugEditorContents",
+          "when": "resourceLangId == LEGv8"
+        },
+        {
+          "command": "extension.legv8-assembly.runEditorContents",
+          "when": "resourceLangId == LEGv8"
+        }
+      ],
+      "debug/variables/context": [
+        {
+          "command": "extension.legv8-assembly.toggleFormatting",
+          "when": "debugType == 'LEGv8' && debugProtocolVariableMenuContext == 'simple'"
+        }
+      ]
+    },
     "breakpoints": [
       {
         "language": "LEGv8"
@@ -57,8 +132,11 @@
     "debuggers": [
       {
         "type": "LEGv8",
+        "languages": [
+          "LEGv8"
+        ],
         "label": "LEGv8 Assembly Debugger",
-        "program": "./out/debugAdapter.js",
+        "program": "./out/DebugAdapter.js",
         "runtime": "node",
         "configurationAttributes": {
           "launch": {
@@ -66,18 +144,67 @@
               "program"
             ]
           },
-          "properties": {
-            "program": {
-              "type": "string",
-              "description": "Absolute path to a text file.",
-              "default": "${workspaceFolder}/${command:AskForProgramName}"
+          "attach": {
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "Absolute path to a text file.",
+                "default": "${workspaceFolder}/${command:AskForProgramName}"
+              },
+              "stopOnEntry": {
+                "type": "boolean",
+                "description": "Automatically stop after attach.",
+                "default": true
+              },
+              "trace": {
+                "type": "boolean",
+                "description": "Enable logging of the Debug Adapter Protocol.",
+                "default": true
+              },
+              "compileError": {
+                "type": "string",
+                "description": "Simulates a compile error in 'attach' request.",
+                "enum": [
+                  "default",
+                  "show",
+                  "hide"
+                ],
+                "enumDescriptions": [
+                  "default: show fake compile error to user",
+                  "show fake compile error to user",
+                  "do not show fake compile error to user"
+                ]
+              }
             }
-          },
-          "serverPort": {
-            "type": "number",
-            "description": "The number of the server port to connect to.",
-            "default": 13337
           }
+        },
+        "initialConfigurations": [
+          {
+            "type": "LEGv8",
+            "request": "launch",
+            "name": "LEGv8 Launch",
+            "program": "${workspaceFolder}/${command:AskForProgramName}",
+            "stopOnEntry": true
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "LEGv8 Debug",
+            "description": "Configuration for debugging a LEGv8 file.",
+            "body": {
+              "type": "LEGv8",
+              "request": "launch",
+              "name": "LEGv8 Launch",
+              "program": "^\"\\${workspaceFolder}/\\${command:AskForProgramName}\"",
+              "stopOnEntry": true
+            }
+          }
+        ],
+        "variables": {
+          "AskForProgramName": "extension.legv8-assembly.getProgramName"
         }
       }
     ],
@@ -97,6 +224,26 @@
           "type": "number",
           "default": 100,
           "description": "Controls the maximum number of problems produced by the server."
+        },
+        "LEGv8.connectType": {
+          "type": "string",
+          "default": "sockets",
+          "description": "How to connect to the LEGv8 running host"
+        },
+        "LEGv8.serverPort": {
+          "type": "number",
+          "default": 13337,
+          "description": "The port number of the LEGv8 running host"
+        },
+        "LEGv8.serverHost": {
+          "type": "string",
+          "default": "127.0.0.1",
+          "description": "The server name the LEGv8 running host"
+        },
+        "LEGv8.serverBase": {
+          "type": "string",
+          "default": "",
+          "description": "Base path of the scripts"
         }
       }
     }
@@ -118,6 +265,12 @@
     "glob": "^8.0.3",
     "mocha": "^10.0.0",
     "typescript": "^4.8.4",
-    "@vscode/test-electron": "^2.1.5"
+    "@vscode/test-electron": "^2.1.5",
+    "@vscode/debugadapter": "^1.56.0",
+    "@vscode/debugadapter-testsupport": "^1.56.0",
+    "await-notify": "^1.0.1",
+    "base64-js": "^1.5.1",
+    "url": "^0.11.0",
+    "vsce": "^2.7.0"
   }
 }
