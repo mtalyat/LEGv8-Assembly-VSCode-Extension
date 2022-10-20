@@ -476,13 +476,23 @@ export class LEGv8Runtime extends EventEmitter {
         return a;
     }
 
-    public getLocalVariables(): RuntimeVariable[] {
+    public getMemory(): RuntimeVariable[] {
+        let a: RuntimeVariable[] = [];
+
+        for (let i = 0; i < Simulation.memorySize; i++) {
+            a.push(new RuntimeVariable(`m${i}`, false, i, this._simulation));
+        }
+
+        return a;
+    }
+
+    public getRegisters(): RuntimeVariable[] {
         // return Array.from(this.variables, ([name, value]) => value);
 
         return Array.from(this._simulation.getRegisters(), (v: bigint, k: number) => new RuntimeVariable('X' + k, true, k, this._simulation));
     }
 
-    public getLocalVariable(name: string): RuntimeVariable | undefined {
+    public getRegister(name: string): RuntimeVariable | undefined {
         // return this.variables.get(name);
 
         let reg = Parser.parseRegister(name);

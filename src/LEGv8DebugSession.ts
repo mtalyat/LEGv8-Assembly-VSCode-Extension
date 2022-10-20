@@ -45,7 +45,7 @@ export class LEGv8DebugSession extends LoggingDebugSession {
     // a Mock runtime (or debugger)
     private _runtime: LEGv8Runtime;
 
-    private _variableHandles = new Handles<'locals' | 'globals' | RuntimeVariable>();
+    private _variableHandles = new Handles<'reg' | 'mem' | 'globals' | RuntimeVariable>();
 
     private _configurationDone = new Subject();
 
@@ -399,8 +399,8 @@ export class LEGv8DebugSession extends LoggingDebugSession {
 
         response.body = {
             scopes: [
-                new Scope("Locals", this._variableHandles.create('locals'), false),
-                new Scope("Globals", this._variableHandles.create('globals'), true)
+                new Scope("Registers", this._variableHandles.create('reg'), false),
+                new Scope("Memory", this._variableHandles.create('mem'), false)
             ]
         };
         this.sendResponse(response);
@@ -449,9 +449,11 @@ export class LEGv8DebugSession extends LoggingDebugSession {
         let vs: RuntimeVariable[] = [];
 
         const v = this._variableHandles.get(args.variablesReference);
-        if (v === 'locals') {
-            vs = this._runtime.getLocalVariables();
-        } else if (v === 'globals') {
+        if (v === 'reg') {
+            vs = this._runtime.getRegisters();
+        } else if (v == 'mem') {
+            vs = this._runtime.getMemory();
+        } else if (v == 'globals') {
             if (request) {
                 this._cancellationTokens.set(request.seq, false);
                 vs = await this._runtime.getGlobalVariables(() => !!this._cancellationTokens.get(request.seq));
@@ -471,8 +473,8 @@ export class LEGv8DebugSession extends LoggingDebugSession {
 
     protected setVariableRequest(response: DebugProtocol.SetVariableResponse, args: DebugProtocol.SetVariableArguments): void {
         const container = this._variableHandles.get(args.variablesReference);
-        const rv = container === 'locals'
-            ? this._runtime.getLocalVariable(args.name)
+        const rv = container === 'reg'
+            ? this._runtime.getRegister(args.name)
             // : container instanceof RuntimeVariable && container.value instanceof Array
             //     ? container.value.find(v => v.name === args.name)
             : undefined;
@@ -571,7 +573,7 @@ export class LEGv8DebugSession extends LoggingDebugSession {
 
             default:
                 if (args.expression.startsWith('$')) {
-                    rv = this._runtime.getLocalVariable(args.expression.substr(1));
+                    rv = this._runtime.getRegister(args.expression.substr(1));
                 } else {
                     rv = new RuntimeVariable('eval', true, 0, this._runtime.Simulation);
                 }
@@ -599,7 +601,7 @@ export class LEGv8DebugSession extends LoggingDebugSession {
     protected setExpressionRequest(response: DebugProtocol.SetExpressionResponse, args: DebugProtocol.SetExpressionArguments): void {
 
         if (args.expression.startsWith('$')) {
-            const rv = this._runtime.getLocalVariable(args.expression.substr(1));
+            const rv = this._runtime.getRegister(args.expression.substr(1));
             if (rv) {
                 rv.value = this.convertToRuntime(args.value);
                 response.body = this.convertFromRuntime(rv);
