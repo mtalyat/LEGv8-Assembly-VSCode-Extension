@@ -2,6 +2,10 @@
 
 All notable changes to the "LEGv8 Assembly" extension will be documented in this file.
 
+## 1.1.2
+
+- Removed REPL command from startup.
+
 ## 1.1.1
 
 - Removed uneccessary configuration settings.

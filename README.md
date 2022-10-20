@@ -37,6 +37,10 @@ If you find any new issues, please create an issue for them on the [Github repos
 
 ## Release Notes
 
+### 1.1.2
+
+- Removed REPL command from startup.
+
 ### 1.1.1
 
 - Removed uneccessary configuration settings.
