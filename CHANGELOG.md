@@ -4,6 +4,12 @@ All notable changes to the "LEGv8 Assembly" extension will be documented in this
 
 ## [Unreleased]
 
+- Debugger support.
+  - Step, step in, step out.
+  - Continue.
+  - Breakpoints.
+- Stack overflow detection.
+
 ## 1.0.4
 
 - Fixed support for HALT, which currently does the same as DUMP.
