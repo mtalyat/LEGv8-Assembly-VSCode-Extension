@@ -479,7 +479,7 @@ export class LEGv8Runtime extends EventEmitter {
     public getMemory(): RuntimeVariable[] {
         let a: RuntimeVariable[] = [];
 
-        for (let i = 0; i < Simulation.memorySize; i++) {
+        for (let i = 0; i < this._simulation.memorySize; i++) {
             a.push(new RuntimeVariable(`m${i}`, false, i, this._simulation));
         }
 

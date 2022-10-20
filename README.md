@@ -22,6 +22,7 @@ The LEGv8 Assembly extension has the following features:
 * Syntax highlighting.
 * Autocomplete/autofill options for all of the implemented instructions.
 * A mock debugger that will run through and evaluate the assembly code.
+* Ability to configure the simulation within settings.
 
 To see a list of all instructions and features implemented within the simulation, check out the wiki tab.
 
