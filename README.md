@@ -36,7 +36,12 @@ If you find any new issues, please create an issue for them on the [Github repos
 
 ## Release Notes
 
-## 1.1.0
+### 1.1.1
+
+- Removed uneccessary configuration settings.
+- Added configuration setting for simulation memory size.
+
+### 1.1.0
 
 - Debugger support.
   - Step, step in, step out.
