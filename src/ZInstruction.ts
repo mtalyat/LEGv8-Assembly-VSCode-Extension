@@ -2,6 +2,7 @@ import { CoreInstruction } from "./CoreInstruction";
 import { Instruction } from "./Instruction";
 import { InstructionMnemonic } from "./InstructionMnemonic";
 import { Line } from "./Line";
+import { Output } from "./Output";
 import { Simulation } from "./Simulation";
 
 /**
@@ -28,7 +29,7 @@ export class ZInstruction extends Instruction {
                 sim.print(this.extra);
                 break;
             case InstructionMnemonic.PRNL:
-                sim.output("");
+                Output.writeLine();
                 break;
             case InstructionMnemonic.HALT:
                 sim.halt();

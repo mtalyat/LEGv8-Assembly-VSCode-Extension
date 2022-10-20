@@ -9,6 +9,12 @@ import { PackedNumber } from "./PackedNumber";
 import { Parser } from "./Parser";
 import { Stopwatch } from "./Stopwatch";
 
+export class SimulationError extends Error {
+    constructor(message?: string) {
+        super(message);
+    }
+}
+
 export class Simulation {
     /**
      * The number of registers within this Simulation.
@@ -229,10 +235,19 @@ export class Simulation {
     }
 
     public setReg(index: number, value: bigint): void {
-        // only set if not the zero register, which should always be zero
-        if (index !== Simulation.xzrRegister) {
-            this._registers[index] = value;
+        switch (index) {
+            case Simulation.xzrRegister: // do not set XZR
+                return;
+            case Simulation.spRegister: // check for stack overflow
+                if (value < 0 || value > Simulation.memorySize) {
+                    this.crash(`Stack overflow! The stack pointer is out of range (0 <= (${value}) <= ${Simulation.memorySize}).`, Simulation.spRegister);
+                }
+            default:
+
         }
+
+        // must be OK to set
+        this._registers[index] = value;
     }
 
     public getRegisters(): BigInt64Array {
@@ -464,10 +479,27 @@ export class Simulation {
         this._isRunning = false;
     }
 
-    public quit(): void {
+    /**
+     * Quits the program using the given code.
+     * @param code the exit code to be used with this program exiting.
+     */
+    public exit(code: number = 0): void {
         this.stop();
 
         this._executionIndex = -1;
+
+        Output.writeLine(`Program exited with code ${code}.`);
+    }
+
+    /**
+     * Crashes the program with the given message and code.
+     * @param message the crash message to be displayed.
+     * @param code the exit code assocaited with this crash.
+     */
+    private crash(message: string, code: number): void {
+        this.exit(code);
+
+        Output.error(message);
     }
 
     /**
@@ -530,7 +562,7 @@ export class Simulation {
         this.printData();
 
         // quit program
-        this.quit();
+        this.exit(0);
     }
 
     public halt(): void {
@@ -539,7 +571,7 @@ export class Simulation {
         this.printData();
 
         // quit program
-        this.quit();
+        this.exit(0);
     }
 
     private printData(): void {
@@ -547,7 +579,7 @@ export class Simulation {
         let value;
         for (let i = 0; i < this._registers.length; i++) {
             value = this._registers[i];
-            this.output(`X${i}:\t[${value.toString(2)}]\t(${value})`);
+            Output.writeLine(`X${i}:\t[${value.toString(2)}]\t(${value})`);
         }
 
         // print memory
@@ -556,18 +588,12 @@ export class Simulation {
             value = this._memory[i];
             texts.push(value.toString());
         }
-        this.output(texts.join(' '));
+        Output.writeLine(texts.join(' '));
     }
 
     // prints the given text to the screen, after being formatted
     public print(text: string): void {
-        this.output(this.format(text));
-    }
-
-    // prints the text to the screen
-    public output(text: string): void {
-        console.log(text);
-        Output.writeLine(text);
+        Output.writeLine(this.format(text));
     }
 
     private format(text: string): string {

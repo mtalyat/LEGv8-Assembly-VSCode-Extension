@@ -35,7 +35,7 @@ export class Output {
      * @param text the text to be printed to the Output window.
      */
     public static error(text: string): void {
-        const t = "ERROR: " + text;
+        const t = `Error: ${text}`;
         this.writeLine(t);
         console.log(t);
     }
@@ -53,9 +53,9 @@ export class Output {
      * Appends a line with the given text to the Output window.
      * @param text the text to be printed to the Output window.
      */
-    public static writeLine(text: string): void {
+    public static writeLine(text?: string): void {
         // append line
-        this.getOutputChannel().appendLine(text);
+        this.getOutputChannel().appendLine(text ?? "");
     }
 
     /**
