@@ -21,8 +21,7 @@ LEGv8 itself is a subset of the ARM assembly architecture. LEG is not used in re
 The LEGv8 Assembly extension has the following features:
 * Syntax highlighting.
 * Autocomplete/autofill options for all of the implemented instructions.
-* A command to run a simulation of the selected text/file. 
-  * F1 > LEGv8: Run LEGv8 Assembly Code
+* A mock debugger that will run through and evaluate the assembly code.
 
 To see a list of all instructions and features implemented within the simulation, check out the wiki tab.
 
