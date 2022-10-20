@@ -212,7 +212,12 @@ export class LEGv8Runtime extends EventEmitter {
         }
     }
 
-    private continueUntilNextReturn(reverse: boolean) {
+    /**
+     * Continues until the top index on the return stack is met.
+     * If the return stack is empty, it continues as normal.
+     * @param reverse 
+     */
+    private continueUntilNextReturn(reverse: boolean): void {
         if (this._returnStack.length === 0) {
             this.continue(reverse);
             return;
@@ -234,6 +239,10 @@ export class LEGv8Runtime extends EventEmitter {
         }
     }
 
+    /**
+     * Performs a normal step in the given direction.
+     * @param reverse 
+     */
     private normalStep(reverse: boolean) {
         // if at the next position, remove it
         if (this._returnStack.length > 0 && this._returnStack[this._returnStack.length - 1] == this._simulation.executionIndex) {
@@ -285,27 +294,6 @@ export class LEGv8Runtime extends EventEmitter {
     }
 
     private updateCurrentLine(reverse: boolean): boolean {
-        // if (reverse) {
-        //     if (this.currentLine > 0) {
-        //         this.currentLine--;
-        //     } else {
-        //         // no more lines: stop at first line
-        //         this.currentLine = 0;
-        //         this.currentColumn = undefined;
-        //         this.sendEvent('stopOnEntry');
-        //         return true;
-        //     }
-        // } else {
-        //     if (this.currentLine < this.sourceLines.length - 1) {
-        //         this.currentLine++;
-        //     } else {
-        //         // no more lines: run to end
-        //         this.currentColumn = undefined;
-        //         this.sendEvent('end');
-        //         return true;
-        //     }
-        // }
-        // return false;
         this.currentLine = this._simulation.executionLineNumber();
 
         if (this.currentLine < 0 || this.currentLine >= this.sourceLines.length) {
@@ -319,7 +307,7 @@ export class LEGv8Runtime extends EventEmitter {
     }
 
     /**
-     * "Step into" for Mock debug means: go to next character
+     * If on a BL statement, step into it and treat it like a function.
      */
     public stepIn(targetId: number | undefined) {
         this.normalStep(false);
@@ -327,7 +315,7 @@ export class LEGv8Runtime extends EventEmitter {
     }
 
     /**
-     * "Step out" for Mock debug means: go to previous character
+     * Continue until the next return index is found.
      */
     public stepOut() {
         this.continueUntilNextReturn(false);

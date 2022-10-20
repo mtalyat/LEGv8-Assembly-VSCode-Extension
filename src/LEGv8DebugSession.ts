@@ -34,7 +34,9 @@ interface ILaunchRequestArguments extends DebugProtocol.LaunchRequestArguments {
 
 interface IAttachRequestArguments extends ILaunchRequestArguments { }
 
-
+/**
+ * Debug session for LEGv8 Assembly.
+ */
 export class LEGv8DebugSession extends LoggingDebugSession {
 
     // we don't support multiple threads, so we can use a hardcoded ID for the default thread
