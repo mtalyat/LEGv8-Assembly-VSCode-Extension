@@ -2,6 +2,11 @@
 
 All notable changes to the "LEGv8 Assembly" extension will be documented in this file.
 
+## 1.1.1
+
+- Removed uneccessary configuration settings.
+- Added configuration setting for simulation memory size.
+
 ## 1.1.0
 
 - Debugger support.
