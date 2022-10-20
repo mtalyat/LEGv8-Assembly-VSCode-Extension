@@ -239,31 +239,19 @@
       "type": "object",
       "title": "LEGv8 configuration",
       "properties": {
-        "languageServerExample.maxNumberOfProblems": {
+        "LEGv8.simulation.memorySize": {
+          "order": 0,
+          "scope": "resource",
+          "type": "number",
+          "default": 4096,
+          "description": "The size of the memory within the simulation, in bytes."
+        },
+        "LEGv8.editor.maxNumberOfProblems": {
+          "order": 1,
           "scope": "resource",
           "type": "number",
           "default": 100,
           "description": "Controls the maximum number of problems produced by the server."
-        },
-        "LEGv8.connectType": {
-          "type": "string",
-          "default": "sockets",
-          "description": "How to connect to the LEGv8 running host"
-        },
-        "LEGv8.serverPort": {
-          "type": "number",
-          "default": 13337,
-          "description": "The port number of the LEGv8 running host"
-        },
-        "LEGv8.serverHost": {
-          "type": "string",
-          "default": "127.0.0.1",
-          "description": "The server name the LEGv8 running host"
-        },
-        "LEGv8.serverBase": {
-          "type": "string",
-          "default": "",
-          "description": "Base path of the scripts"
         }
       }
     }

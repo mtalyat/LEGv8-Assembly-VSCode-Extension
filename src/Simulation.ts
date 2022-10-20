@@ -8,6 +8,7 @@ import { PackedBigInt } from "./PackedBigInt";
 import { PackedNumber } from "./PackedNumber";
 import { Parser } from "./Parser";
 import { Stopwatch } from "./Stopwatch";
+import * as vscode from 'vscode'
 
 export class SimulationError extends Error {
     constructor(message?: string) {
@@ -24,7 +25,7 @@ export class Simulation {
     /**
      * The size of the memory within this Simulation, in bytes.
      */
-    public static readonly memorySize: number = 4096;
+    public readonly memorySize: number = 4096;
 
     /**
      * The index of the Zero Register (XZR).
@@ -110,6 +111,15 @@ export class Simulation {
      * @param instructions the instructions that this Simulation will run.
      */
     public constructor(fileText?: string) {
+        // get things from environment variables
+        const cfg = vscode.workspace.getConfiguration('LEGv8.simulation');
+        const cfgMemSize = cfg.get('memorySize');
+
+        // only set if it exists and is a valid number ( > 0)
+        if (cfgMemSize !== undefined && cfgMemSize !== null && cfgMemSize > 0) {
+            this.memorySize = Number(cfgMemSize);
+        }
+
         this._stopwatch = new Stopwatch();
 
         this._isRunning = false;
@@ -126,7 +136,7 @@ export class Simulation {
 
         this._executionIndex = -1;
 
-        this._memory = new Uint8Array(Simulation.memorySize);
+        this._memory = new Uint8Array(this.memorySize);
         this._registers = new BigInt64Array(Simulation.registerCount);
         this._flags = new PackedNumber(0);
 
@@ -239,8 +249,8 @@ export class Simulation {
             case Simulation.xzrRegister: // do not set XZR
                 return;
             case Simulation.spRegister: // check for stack overflow
-                if (value < 0 || value > Simulation.memorySize) {
-                    this.crash(`Stack overflow! The stack pointer is out of range (0 <= (${value}) <= ${Simulation.memorySize}).`, Simulation.spRegister);
+                if (value < 0 || value > this.memorySize) {
+                    this.crash(`Stack overflow! The stack pointer is out of range (0 <= (${value}) <= ${this.memorySize}).`, Simulation.spRegister);
                 }
             default:
 
@@ -362,8 +372,8 @@ export class Simulation {
         this._flags.setNumber(0);
 
         // set defaults
-        this.setReg(Simulation.spRegister, BigInt(Simulation.memorySize));
-        this.setReg(Simulation.fpRegister, BigInt(Simulation.memorySize));
+        this.setReg(Simulation.spRegister, BigInt(this.memorySize));
+        this.setReg(Simulation.fpRegister, BigInt(this.memorySize));
     }
 
     //#endregion
