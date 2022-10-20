@@ -249,9 +249,15 @@ export class Simulation {
         } else {
             let packed = new PackedBigInt(0n);
 
+            let mem: number;
+
             // pack memory bytes into the number
             for (let i = 0; i < size; i++) {
-                packed.setByte(BigInt(i), this._memory[index + i], 1n);
+                mem = this._memory[index + i];
+
+                if (mem != undefined) {
+                    packed.setByte(BigInt(i), mem, 1n);
+                }
             }
 
             return packed.getNumber();
@@ -283,12 +289,18 @@ export class Simulation {
      * @param right The right operand from the operation before setting the flags.
      */
     public setFlags(result: bigint, left: bigint, right: bigint): void {
+        //console.log(`${this.getFlagsAsString()}: ${left} ? ${right} = ${result}`);
+
         this._flags.setBit(0, result === 0n); // zero flag
         this._flags.setBit(1, result < 0); // negative flag
 
         // TODO: test carry and overflow conditions, they are likely not correct
         this._flags.setBit(2, (left > 0 && right > 0 && result < left && result < right) || (left < 0 && right < 0 && result > left && result > right)); // carry flag
         this._flags.setBit(3, (left > 0 && right > 0 && result < 0) || (left < 0 && right < 0 && result > 0)); // overflow flag
+    }
+
+    public getFlagsAsString(): string {
+        return this._flags.toString(4);
     }
 
     /**

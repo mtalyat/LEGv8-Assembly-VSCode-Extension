@@ -257,7 +257,6 @@ export class LEGv8Runtime extends EventEmitter {
      * Step to the next/previous non empty line.
      */
     public step(instruction: boolean, reverse: boolean) {
-        console.log("step");
         if (instruction) {
             if (reverse) {
                 this.instruction--;
@@ -324,7 +323,6 @@ export class LEGv8Runtime extends EventEmitter {
      */
     public stepIn(targetId: number | undefined) {
         this.normalStep(false);
-        console.log("step in");
         // this.sendEvent('stopOnStep');
     }
 
@@ -333,7 +331,6 @@ export class LEGv8Runtime extends EventEmitter {
      */
     public stepOut() {
         this.continueUntilNextReturn(false);
-        console.log("step out");
         this.sendEvent('stopOnStep');
     }
 
