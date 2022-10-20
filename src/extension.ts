@@ -71,10 +71,6 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	const disposable2 = vscode.commands.registerCommand('legv8-assembly.replLegV8', () => {
-		console.log("Repl command");
-	})
-
 	// autofill
 	const autofillSnippets = vscode.languages.registerCompletionItemProvider('LEGv8', {
 
@@ -221,7 +217,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// 	'.' // triggered whenever a '.' is being typed
 	// );
 	// subscribe commands
-	context.subscriptions.push(disposable, disposable2, autofillSnippets);
+	context.subscriptions.push(disposable, autofillSnippets);
 
 	console.log("Commands registered.");
 
@@ -292,12 +288,12 @@ function activateDebugger(context: vscode.ExtensionContext) {
 	switch (runMode) {
 		case 'server':
 			// run the debug adapter as a server inside the extension and communicate via a socket
-			activateLEGv8Debug(context, new MockDebugAdapterServerDescriptorFactory());
+			activateLEGv8Debug(context, new LEGv8DebugAdapterServerDescriptorFactory());
 			break;
 
 		case 'namedPipeServer':
 			// run the debug adapter as a server inside the extension and communicate via a named pipe (Windows) or UNIX domain socket (non-Windows)
-			activateLEGv8Debug(context, new MockDebugAdapterNamedPipeServerDescriptorFactory());
+			activateLEGv8Debug(context, new LEGv8DebugAdapterNamedPipeServerDescriptorFactory());
 			break;
 
 		case 'external': default:
@@ -339,7 +335,7 @@ class DebugAdapterExecutableFactory implements vscode.DebugAdapterDescriptorFact
 	}
 }
 
-class MockDebugAdapterServerDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
+class LEGv8DebugAdapterServerDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 
 	private server?: Net.Server;
 
@@ -365,7 +361,7 @@ class MockDebugAdapterServerDescriptorFactory implements vscode.DebugAdapterDesc
 	}
 }
 
-class MockDebugAdapterNamedPipeServerDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
+class LEGv8DebugAdapterNamedPipeServerDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 
 	private server?: Net.Server;
 

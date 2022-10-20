@@ -41,10 +41,6 @@
         "title": "LEGv8: Run LEGv8 Assembly Code"
       },
       {
-        "command": "legv8-assembly.replLegV8",
-        "title": "LEGv8: REPL LEGv8 Assembly Code"
-      },
-      {
         "command": "extension.legv8-assembly.debugEditorContents",
         "title": "Debug File",
         "category": "LEGv8 Debug",
@@ -68,12 +64,6 @@
         "command": "legv8-assembly.runLegV8",
         "key": "ctrl+r",
         "mac": "cmd+r",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "legv8-assembly.replLegV8",
-        "key": "ctrl+9",
-        "mac": "cmd+9",
         "when": "editorTextFocus"
       }
     ],
