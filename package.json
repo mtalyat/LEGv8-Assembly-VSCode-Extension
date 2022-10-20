@@ -2,7 +2,7 @@
   "name": "legv8-assembly",
   "displayName": "LEGv8 Assembly",
   "description": "Language support and built-in simulator for LEGv8 Assembly.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "engines": {
     "vscode": "^1.72.0"
   },
