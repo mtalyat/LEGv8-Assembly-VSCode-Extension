@@ -37,6 +37,17 @@ If you find any new issues, please create an issue for them on the [Github repos
 
 ## Release Notes
 
+## 1.1.0
+
+- Debugger support.
+  - Step, step in, step out.
+  - Continue.
+  - Breakpoints.
+  - Edit and view registers or memory during runtime.
+  - Reverse debugging is not supported. Clicking those will act as normal debugging.
+  - Use the Run menu item to see all available commands with the debugger.
+- Stack overflow detection.
+
 ### 1.0.1
 
 - Fixed support for HALT, which currently does the same as DUMP.

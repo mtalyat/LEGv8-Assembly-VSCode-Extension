@@ -2,12 +2,14 @@
 
 All notable changes to the "LEGv8 Assembly" extension will be documented in this file.
 
-## [Unreleased]
+## 1.1.0
 
 - Debugger support.
   - Step, step in, step out.
   - Continue.
   - Breakpoints.
+  - Edit and view registers or memory during runtime.
+  - Reverse debugging is not supported. Clicking those will act as normal debugging.
 - Stack overflow detection.
 
 ## 1.0.4
