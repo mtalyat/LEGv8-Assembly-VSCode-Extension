@@ -16,6 +16,8 @@
     },
     "devDependencies": {
         "@types/vscode": "^1.72.0",
-        "@vscode/test-electron": "^2.1.2"
+        "@vscode/test-electron": "^2.1.5",
+        "@vscode/debugadapter": "^1.57.0",
+        "@vscode/debugadapter-testsupport": "^1.57.0"
     }
 }

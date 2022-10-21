@@ -9,8 +9,12 @@
   "publisher": "mtalyat",
   "license": "MIT",
   "dependencies": {
+    "@vscode/debugadapter": "^1.57.0",
+    "@vscode/debugadapter-testsupport": "^1.57.0",
+    "@vscode/debugprotocol": "1.57.0",
+    "await-notify": "1.0.1",
     "vscode-languageclient": "^7.0.0",
-    "await-notify": "1.0.1"
+    "base64-js": "^1.5.1"
   },
   "categories": [
     "Programming Languages",
@@ -29,6 +33,9 @@
   },
   "activationEvents": [
     "onCommand:legv8-assembly.runLegV8",
+    "onCommand:extension.legv8-assembly.debugEditorContents",
+    "onCommand:extension.legv8-assembly.runEditorContents",
+    "onCommand:extension.legv8-assembly.toggleFormatting",
     "onLanguage:LEGv8",
     "onDebug"
   ],
@@ -256,27 +263,28 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "test-compile": "tsc -p ./"
   },
   "devDependencies": {
-    "@types/vscode": "^1.72.0",
     "@types/glob": "^8.0.0",
     "@types/mocha": "^10.0.0",
     "@types/node": "16.x",
+    "@types/vscode": "^1.72.0",
+    "@vscode/test-electron": "^2.1.5",
+    "esbuild": "^0.15.12",
     "eslint": "^8.24.0",
     "glob": "^8.0.3",
     "mocha": "^10.0.0",
     "typescript": "^4.8.4",
-    "@vscode/test-electron": "^2.1.5",
-    "@vscode/debugadapter": "^1.56.0",
-    "@vscode/debugadapter-testsupport": "^1.56.0",
-    "await-notify": "^1.0.1",
-    "base64-js": "^1.5.1",
     "url": "^0.11.0",
     "vsce": "^2.7.0"
   }

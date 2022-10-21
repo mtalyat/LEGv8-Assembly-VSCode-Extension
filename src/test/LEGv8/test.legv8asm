@@ -1,0 +1,13 @@
+main:
+MOVZ X0, #10 //i
+MOVZ X1, #0  //result
+
+loop:
+CMPI X0, #0 //while i > 0
+B.LE end
+SUBI X0, X0, #1 //i--
+ADDI X1, X1, #2 //result += 2
+B loop
+
+end:
+DUMP 
