@@ -221,10 +221,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	console.log("Commands registered.");
 
-	// connect to language server
-	activateLanguageServerProtocol(context);
+	// // connect to language server
+	// activateLanguageServerProtocol(context);
 
-	console.log("Connected to LSP.");
+	// console.log("Connected to LSP.");
 
 	activateDebugger(context);
 

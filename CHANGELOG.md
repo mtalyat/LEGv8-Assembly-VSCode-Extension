@@ -7,6 +7,7 @@ All notable changes to the "LEGv8 Assembly" extension will be documented in this
 - Removed REPL command from startup.
 - Adjusted dependencies.
 - Fixed the bug that would crash the program when trying to debug or run the simulation.
+- Disabled the Language Server Protocol, again.
 
 ## 1.1.1
 

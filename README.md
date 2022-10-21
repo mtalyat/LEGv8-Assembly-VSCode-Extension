@@ -37,9 +37,14 @@ If you find any new issues, please create an issue for them on the [Github repos
 
 ## Release Notes
 
+The following contains the release notes for the past 5 releases. Check out the CHANGELOG to see the full list.
+
 ### 1.1.2
 
 - Removed REPL command from startup.
+- Adjusted dependencies.
+- Fixed the bug that would crash the program when trying to debug or run the simulation.
+- Disabled the Language Server Protocol, again.
 
 ### 1.1.1
 
