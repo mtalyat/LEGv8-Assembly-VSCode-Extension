@@ -14,6 +14,8 @@
     "@vscode/debugprotocol": "1.57.0",
     "await-notify": "1.0.1",
     "vscode-languageclient": "^7.0.0",
+    "vscode-languageserver": "^7.0.0",
+    "vscode-languageserver-textdocument": "^1.0.4",
     "base64-js": "^1.5.1"
   },
   "categories": [

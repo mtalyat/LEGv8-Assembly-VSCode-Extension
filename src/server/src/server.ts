@@ -116,7 +116,7 @@ function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
     if (!result) {
         result = connection.workspace.getConfiguration({
             scopeUri: resource,
-            section: 'LEGv8LanguageServer'
+            section: 'LEGv8.editor'
         });
         documentSettings.set(resource, result);
     }

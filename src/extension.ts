@@ -222,9 +222,9 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log("Commands registered.");
 
 	// // connect to language server
-	// activateLanguageServerProtocol(context);
+	activateLanguageServerProtocol(context);
 
-	// console.log("Connected to LSP.");
+	console.log("Connected to LSP.");
 
 	activateDebugger(context);
 
@@ -241,7 +241,7 @@ export function deactivate() {
 }
 
 function activateLanguageServerProtocol(context: vscode.ExtensionContext): void {
-	let serverModule = context.asAbsolutePath(path.join('src', 'server', 'src', 'server.js'));
+	let serverModule = context.asAbsolutePath(path.join('out', 'server', 'src', 'server.js'));
 	let debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
 
 	// If the extension is launched in debug mode then the debug server options are used

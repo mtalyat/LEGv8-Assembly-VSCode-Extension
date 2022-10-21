@@ -2,6 +2,10 @@
 
 All notable changes to the "LEGv8 Assembly" extension will be documented in this file.
 
+## 1.2.0
+
+- Enabled Language Server Protocol.
+
 ## 1.1.2
 
 - Removed REPL command from startup.
